@@ -2,17 +2,33 @@
 #define LIB_DET_INTERFACE_H
 #define MAX_TARGETS 25 // 25 Seems enough, want more? recompile
 
+struct imagesize_t
+{
+    int width;
+    int height;
+};
+// Provides a byte for each pixel
+struct motion_t
+{
+	imagesize_t size;
+	unsigned char* motion;
+};
+
+struct motionhelper_t
+{
+    imagesize_t size;
+    int MinX;
+    int MinY;
+    int MaxX;
+    int MaxY;
+    unsigned char* motion;
+};
+
 struct pixel_t
 {
     unsigned char r;
     unsigned char g;
     unsigned char b;
-};
-
-struct imagesize_t
-{
-    int width;
-    int height;
 };
 
 class CDetectorImage
@@ -32,7 +48,10 @@ public:
     {
         Pixel = &m_psPixels[x + y * m_sSize.width];
     };
-    void GetSize() { return m_sSize };
+    imagesize_t GetSize()
+    {
+        return m_sSize;
+    };
 private:
     imagesize_t m_sSize;
     pixel_t* m_psPixels;
@@ -40,10 +59,10 @@ private:
 
 struct target_t
 {
-    int x;
-    int y;
-    int width;
-    int height;
+    float x;
+    float y;
+    float width;
+    float height;
 };
 
 class IDetector

@@ -5,24 +5,13 @@
 #define MOTION_XY(_struct_, x, y) _struct_.motion[(x) + (y) * _struct_.size.width]
 #define PMOTION_XY(_struct_, x, y) _struct_->motion[(x) + (y) * _struct_->size.width]
 
-#define XY_LOOP(_w_,_h_) for(int y = 0; x < _h_; y++) for(int x = 0; x < _w_; x++)
+#define XY_LOOP(_w_,_h_) for(int y = 0; y < _h_; y++) for(int x = 0; x < _w_; x++)
 
-// Provides a byte for each pixel
-struct motion_t
-{
-	imagesize_t size;
-	unsigned char* motion;
-};
+#define PIXEL_NOMOTION 0
+#define PIXEL_MOTION 1
+#define PIXEL_SCANNEDMOTION 2
 
-struct motionhelper_t
-{
-    imagesize_t size;
-    int MinX;
-    int MinY;
-    int MaxX;
-    int MaxY;
-    unsigned char* motion;
-};
+
 
 unsigned char DiffrenceBetween(unsigned char a, unsigned char b)
 {
@@ -55,9 +44,9 @@ void AbsoluteDiffrence(CDetector* self, CDetectorImage* img1, CDetectorImage* im
         short totaldiff = diff_r + diff_g + diff_b;
 
         if(totaldiff > self->m_sDiffrenceThreshold)
-            PMOTION_XY(motion, x, y) = 1;
+            PMOTION_XY(motion, x, y) = PIXEL_MOTION;
         else
-            PMOTION_XY(motion, x, y) = 0;
+            PMOTION_XY(motion, x, y) = PIXEL_NOMOTION;
     }
 }
 
@@ -65,7 +54,7 @@ void DoNextScanLine(int x, int y, motionhelper_t* motion)
 {
     if( x >= motion->size.width || y >= motion->size.height )
         return;
-    if( PMOTION_XY(motion, x, y) == 0 )
+    if( PMOTION_XY(motion, x, y) == PIXEL_NOMOTION )
         return;
 
     if (x > motion->MaxX)
@@ -80,9 +69,9 @@ void DoNextScanLine(int x, int y, motionhelper_t* motion)
     int y1 = y;
 
     //draw current scanline from start position to the top
-    while (y1 < motion->size.height && PMOTION_XY(motion, x, y1) == 1)
+    while (y1 < motion->size.height && PMOTION_XY(motion, x, y1) == PIXEL_MOTION)
     {
-        PMOTION_XY(motion, x, y1) = 2;
+        PMOTION_XY(motion, x, y1) = PIXEL_SCANNEDMOTION;
         if (y1 > motion->MaxY)
             motion->MaxY = y1;
         y1++;
@@ -90,9 +79,9 @@ void DoNextScanLine(int x, int y, motionhelper_t* motion)
 
     //draw current scanline from start position to the bottom
     y1 = y - 1;
-    while (y1 >= 0 && PMOTION_XY(motion, x, y1) == 1)
+    while (y1 >= 0 && PMOTION_XY(motion, x, y1) == PIXEL_MOTION)
     {
-        PMOTION_XY(motion, x, y1) = 2;
+        PMOTION_XY(motion, x, y1) = PIXEL_SCANNEDMOTION;
         if (y1 < motion->MinY)
             motion->MinY = y1;
         y1--;
@@ -100,32 +89,32 @@ void DoNextScanLine(int x, int y, motionhelper_t* motion)
 
     //test for new scanlines to the left and create seeds
     y1 = y;
-    while (y1 < motion->size.height && PMOTION_XY(motion, x, y1) == 2)
+    while (y1 < motion->size.height && PMOTION_XY(motion, x, y1) == PIXEL_SCANNEDMOTION)
     {
-        if (x > 0 && PMOTION_XY(motion, x - 1, y1) == 1)
+        if (x > 0 && PMOTION_XY(motion, x - 1, y1) == PIXEL_MOTION)
             DoNextScanLine(x - 1, y1, motion);
         y1++;
     }
     y1 = y - 1;
-    while (y1 >= 0 && PMOTION_XY(motion, x, y1) == 2)
+    while (y1 >= 0 && PMOTION_XY(motion, x, y1) == PIXEL_SCANNEDMOTION)
     {
-        if (x > 0 && PMOTION_XY(motion, x - 1, y1) == 1)
+        if (x > 0 && PMOTION_XY(motion, x - 1, y1) == PIXEL_MOTION)
             DoNextScanLine(x - 1, y1, motion);
         y1--;
     }
 
     //test for new scanlines to the right
     y1 = y;
-    while (y1 < motion->size.height && PMOTION_XY(motion, x, y1) == 2)
+    while (y1 < motion->size.height && PMOTION_XY(motion, x, y1) == PIXEL_SCANNEDMOTION)
     {
-        if (x < motion->size.width - 1 && PMOTION_XY(motion, x + 1, y1) == 1)
+        if (x < motion->size.width - 1 && PMOTION_XY(motion, x + 1, y1) == PIXEL_MOTION)
             DoNextScanLine(x + 1, y1, motion);
         y1++;
     }
     y1 = y - 1;
-    while (y1 >= 0 && PMOTION_XY(motion, x, y1) == 2)
+    while (y1 >= 0 && PMOTION_XY(motion, x, y1) == PIXEL_SCANNEDMOTION)
     {
-        if (x < motion->size.width - 1 && PMOTION_XY(motion, x + 1, y1) == 1)
+        if (x < motion->size.width - 1 && PMOTION_XY(motion, x + 1, y1) == PIXEL_MOTION)
             DoNextScanLine(x + 1, y1, motion);
         y1--;
     }
@@ -149,7 +138,7 @@ CDetector::CDetector(imagesize_t Size)
 {
     m_sSize = Size;
     m_pLastImage = 0;
-    m_flDiffrenceThreshold = 10.0f;
+    m_sDiffrenceThreshold = 10;
 }
 
 CDetector::~CDetector()
@@ -161,18 +150,43 @@ void CDetector::PushImage(CDetectorImage* pImage)
 {
     if(!m_pLastImage)
         m_pLastImage = pImage;
-
+    // Clear the target cache
+    for(int i = 0; i < MAX_TARGETS; i++)
+    {
+        delete m_pTargets[i];
+        m_pTargets[i] = 0;
+    }
     motion_t* motion;
     AbsoluteDiffrence(pImage, m_pLastImage, motion);
+    int w,h;
+    w = motion->size.width;
+    h = motion->size.height;
+    int count = 0;
+    XY_LOOP(w,h)
+    {
+        if(PMOTION_XY(motion, x, y) == PIXEL_MOTION)
+        {
+            motionhelper_t helper = GetBoundsFromMotion(motion, w, h, x, y);
 
+            target_t* targ = new target_t;
+            targ->x = (float)helper.MinX / (float)w;
+            targ->y = (float)helper.MinY / (float)h;
+            targ->width = (float)(helper.MaxX - targ->x) / (float)w;
+            targ->height = (float)(helper.MaxY - targ->y) / (float)h;
+            m_pTargets[++count] = targ;
+        }
+    }
     delete motion;
 }
 
 int CDetector::GetTargets(target_t* Targets[MAX_TARGETS])
 {
+    if(!m_pTargets)
+        return 0;
+
     *Targets = new target_t[MAX_TARGETS];
-    memcpy(Targets, m_pTargets, sizeof(m_pTargets));
-    return 0;
+    memcpy(Targets, m_pTargets, sizeof(*Targets));
+    return 1;
 }
 
 void CDetector::SetDiffrenceThreshold(short sAmmount)

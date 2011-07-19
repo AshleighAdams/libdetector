@@ -7,7 +7,7 @@ void AbsoluteDiffrence(CDetectorImage* img1, CDetectorImage* img2, motion_t* mot
 
 class CDetector : public IDetector
 {
-    friend void AbsoluteDiffrence(CDetectorImage* img1, CDetectorImage* img2, motion_t* motion);
+    friend void AbsoluteDiffrence(CDetector*, CDetectorImage*, CDetectorImage*, motion_t*);
 public:
     CDetector(imagesize_t Size);
     ~CDetector();
