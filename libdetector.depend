@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1311085671 source:/home/c0bra/CODEBLOCKS/libdetector/libdetector.cpp
+	"libdetector.h"
+
+1311098249 /home/c0bra/CODEBLOCKS/libdetector/libdetector.h
+	"interface.h"
+
+1311097820 /home/c0bra/CODEBLOCKS/libdetector/interface.h
+
