@@ -93,92 +93,53 @@ void DoNextScanLine(int x, int y, motionhelper_t* motion)
     }
 }
 
-/*
-
-public void DoNextScanLine(int x, int y, ref MotionHelper motion)
+motionhelper_t GetBoundsFromMotion(motion_t* motion, int sizex, int sizey, int x, int y)
 {
-    if (x >= motion.Width || y >= motion.Height)
-        return;
-    if (motion.Motion[x, y] == 0)
-        return;
-
-    if (x > motion.MaxX)
-        motion.MaxX = x;
-    if (x < motion.MinX)
-        motion.MinX = x;
-    if (y > motion.MaxY)
-        motion.MaxY = y;
-    if (y < motion.MinY)
-        motion.MinY = y;
-
-    int y1;
-
-    //draw current scanline from start position to the top
-    y1 = y;
-    while (y1 < motion.Height && motion.Motion[x, y1] == 1)
-    {
-        motion.Motion[x, y1] = 2;
-        if (y1 > motion.MaxY)
-            motion.MaxY = y1;
-        y1++;
-    }
-
-    //draw current scanline from start position to the bottom
-    y1 = y - 1;
-    while (y1 >= 0 && motion.Motion[x, y1] == 1)
-    {
-        motion.Motion[x, y1] = 2;
-        if (y1 < motion.MinY)
-            motion.MinY = y1;
-        y1--;
-    }
-
-    //test for new scanlines to the left
-    y1 = y;
-    while (y1 < motion.Height && (motion.Motion[x, y1] == 2))
-    {
-
-        if (x > 0 && motion.Motion[x -1, y1] == 1)
-        {
-            DoNextScanLine(x - 1, y1, ref motion);
-        }
-        y1++;
-    }
-    y1 = y - 1;
-    while (y1 >= 0 && (motion.Motion[x, y1] == 2))
-    {
-        if (x > 0 && motion.Motion[x - 1, y1] == 1)
-        {
-            DoNextScanLine(x - 1, y1, ref motion);
-        }
-        y1--;
-    }
-
-    //test for new scanlines to the right
-    y1 = y;
-    while (y1 < motion.Height && (motion.Motion[x, y1] == 2))
-    {
-        if (x < motion.Width - 1 && motion.Motion[x + 1, y1] == 1)
-        {
-            DoNextScanLine(x + 1, y1, ref motion);
-        }
-        y1++;
-    }
-    y1 = y - 1;
-    while (y1 >= 0 && (motion.Motion[x, y1] == 2))
-    {
-        if (x < motion.Width - 1 && motion.Motion[x + 1, y1] == 1)
-        {
-            DoNextScanLine(x + 1, y1, ref motion);
-        }
-        y1--;
-    }
+    motionhelper_t motionhelper;
+    motionhelper.motion = motion->motion;
+    motionhelper.MaxX = x;
+    motionhelper.MinX = x;
+    motionhelper.MaxY = y;
+    motionhelper.MinY = y;
+    motionhelper.size.width = sizex;
+    motionhelper.size.height = sizey;
+    DoNextScanLine(x, y, &motionhelper);
+    return motionhelper;
 }
+
+CDetector::CDetector(imagesize_t Size)
+{
+    m_sSize = Size;
+    m_pLastImage = 0;
+    m_flDiffrenceThreshold = 10.0f;
+}
+
+CDetector::~CDetector()
+{
+    delete m_pLastImage;
+}
+
+void CDetector::PushImage(CDetectorImage* Image)
+{
+}
+
+int CDetector::GetTargets(target_t* Targets[MAX_TARGETS])
+{
+    Targets = new target_t[MAX_TARGETS];
+
+    return 0;
+}
+
+void CDetector::SetDiffrenceThreshold(float flAmmount)
+{
+    m_flDiffrenceThreshold = flAmmount;
+}
+/*
 
 /// <summary>
 /// Uses a FloodFill scanline algorithm to get a targets bounds
 /// </summary>
-public MotionHelper GetBoundsFromMotion(ref byte[,] motion, Point size, Point seed)
+public MotionHelper GetBoundsFromMotion(ref byte[,] motion, int sizex, int sizey, int x, int y)
 {
     MotionHelper helper = new MotionHelper(motion, size.X, size.Y, seed.X, seed.Y);
     DoNextScanLine(seed.X, seed.Y, ref helper); // +2 and +1 are for creating an empty  box around the whole shape, (1's never at the end /start of an array)
