@@ -1,9 +1,11 @@
-
+#include "string.h"
 #include "libdetector.h"
 
 // Helper crap to save time
 #define MOTION_XY(_struct_, x, y) _struct_.motion[(x) + (y) * _struct_.size.width]
 #define PMOTION_XY(_struct_, x, y) _struct_->motion[(x) + (y) * _struct_->size.width]
+
+#define XY_LOOP(_w_,_h_) for(int y = 0; x < _h_; y++) for(int x = 0; x < _w_; x++)
 
 // Provides a byte for each pixel
 struct motion_t
@@ -22,6 +24,42 @@ struct motionhelper_t
     unsigned char* motion;
 };
 
+unsigned char DiffrenceBetween(unsigned char a, unsigned char b)
+{
+    short x = (short)a - (short)b;
+    if(x<0) return (unsigned char)-x;
+    return (unsigned char)x;
+}
+
+void AbsoluteDiffrence(CDetector* self, CDetectorImage* img1, CDetectorImage* img2, motion_t* motion)
+{
+    motion = new motion_t;
+    motion->size = img1->GetSize();
+    int w,h;
+    w = motion->size.width;
+    h = motion->size.height;
+    motion->motion = new unsigned char[w*h];
+
+    pixel_t* pix1;
+    pixel_t* pix2;
+
+    XY_LOOP(w,h)
+    {
+        img1->Pixel(x, y, pix1);
+        img2->Pixel(x, y, pix2);
+
+        unsigned char diff_r = DiffrenceBetween(pix1->r, pix2->r);
+        unsigned char diff_g = DiffrenceBetween(pix1->g, pix2->g);
+        unsigned char diff_b = DiffrenceBetween(pix1->b, pix2->b);
+
+        short totaldiff = diff_r + diff_g + diff_b;
+
+        if(totaldiff > self->m_sDiffrenceThreshold)
+            PMOTION_XY(motion, x, y) = 1;
+        else
+            PMOTION_XY(motion, x, y) = 0;
+    }
+}
 
 void DoNextScanLine(int x, int y, motionhelper_t* motion)
 {
@@ -119,40 +157,25 @@ CDetector::~CDetector()
     delete m_pLastImage;
 }
 
-void CDetector::PushImage(CDetectorImage* Image)
+void CDetector::PushImage(CDetectorImage* pImage)
 {
+    if(!m_pLastImage)
+        m_pLastImage = pImage;
+
+    motion_t* motion;
+    AbsoluteDiffrence(pImage, m_pLastImage, motion);
+
+    delete motion;
 }
 
 int CDetector::GetTargets(target_t* Targets[MAX_TARGETS])
 {
-    Targets = new target_t[MAX_TARGETS];
-
+    *Targets = new target_t[MAX_TARGETS];
+    memcpy(Targets, m_pTargets, sizeof(m_pTargets));
     return 0;
 }
 
-void CDetector::SetDiffrenceThreshold(float flAmmount)
+void CDetector::SetDiffrenceThreshold(short sAmmount)
 {
-    m_flDiffrenceThreshold = flAmmount;
+    m_sDiffrenceThreshold = sAmmount;
 }
-/*
-
-/// <summary>
-/// Uses a FloodFill scanline algorithm to get a targets bounds
-/// </summary>
-public MotionHelper GetBoundsFromMotion(ref byte[,] motion, int sizex, int sizey, int x, int y)
-{
-    MotionHelper helper = new MotionHelper(motion, size.X, size.Y, seed.X, seed.Y);
-    DoNextScanLine(seed.X, seed.Y, ref helper); // +2 and +1 are for creating an empty  box around the whole shape, (1's never at the end /start of an array)
-    helper.Shape = new byte[helper.MaxX - helper.MinX + 4, helper.MaxY - helper.MinY + 4];
-
-    for (int x = helper.MinX; x < helper.MaxX; x++)
-        for (int y = helper.MinY; y < helper.MaxY; y++)
-            if (helper.Motion[x, y] == 2)
-            {
-                helper.Shape[x - helper.MinX + 2, y - helper.MinY + 2] = 1;
-            }
-
-    return helper;
-}
-
-*/

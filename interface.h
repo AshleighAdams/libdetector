@@ -32,6 +32,7 @@ public:
     {
         Pixel = &m_psPixels[x + y * m_sSize.width];
     };
+    void GetSize() { return m_sSize };
 private:
     imagesize_t m_sSize;
     pixel_t* m_psPixels;
