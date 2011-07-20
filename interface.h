@@ -71,6 +71,7 @@ public:
     CDetectorImage(imagesize_t size)
     {
         this->Refrence();
+        std::cout << "CREATED IMG\n";
         m_sSize.width = size.width;
         m_sSize.height = size.height;
         m_psPixels = new pixel_t[size.width + size.width * size.height];
@@ -83,6 +84,7 @@ public:
     {
         if(m_iRefrenceCount == 1)
             return this;
+        std::cout << "DELETED IMG\n";
         imagesize_t selfsize = this->GetSize();
         int size_total = (selfsize.width + selfsize.width * selfsize.height) * 3; // 3 bytes per pixel;
         CDetectorImage* ptr = new CDetectorImage(selfsize);

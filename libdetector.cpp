@@ -44,6 +44,9 @@ motion_t* AbsoluteDiffrence(CDetector* self, CDetectorImage* img1, CDetectorImag
         pix1 = img1->Pixel(x, y);
         pix2 = img2->Pixel(x, y);
 
+        unsigned char pix1_r = pix1->r;
+        unsigned char pix2_r = pix2->r;
+
         unsigned char diff_r = DiffrenceBetween(pix1->r, pix2->r);
         unsigned char diff_g = DiffrenceBetween(pix1->g, pix2->g);
         unsigned char diff_b = DiffrenceBetween(pix1->b, pix2->b);
@@ -128,17 +131,17 @@ void DoNextScanLine(int x, int y, motionhelper_t* motion)
     }
 }
 
-motionhelper_t GetBoundsFromMotion(motion_t* motion, int sizex, int sizey, int x, int y)
+motionhelper_t* GetBoundsFromMotion(motion_t* motion, int sizex, int sizey, int x, int y)
 {
-    motionhelper_t motionhelper;
-    motionhelper.motion = motion->motion;
-    motionhelper.MaxX = x;
-    motionhelper.MinX = x;
-    motionhelper.MaxY = y;
-    motionhelper.MinY = y;
-    motionhelper.size.width = sizex;
-    motionhelper.size.height = sizey;
-    DoNextScanLine(x, y, &motionhelper);
+    motionhelper_t* motionhelper = new motionhelper_t;
+    motionhelper->motion = motion->motion;
+    motionhelper->MaxX = x;
+    motionhelper->MinX = x;
+    motionhelper->MaxY = y;
+    motionhelper->MinY = y;
+    motionhelper->size.width = sizex;
+    motionhelper->size.height = sizey;
+    DoNextScanLine(x, y, motionhelper);
     return motionhelper;
 }
 
@@ -148,7 +151,7 @@ CDetector::CDetector(imagesize_t Size)
     m_pLastImage = 0;
     m_sDiffrenceThreshold = 10;
     m_iTargets = 0;
-
+    m_flMinTargSize = 0.01f;
     for(int i = 0; i < MAX_TARGETS; i++)
         m_pTargets[i] = 0;
 }
@@ -185,21 +188,31 @@ bool CDetector::PushImage(CDetectorImage* pImage)
     {
         if(PMOTION_XY(motion, x, y) == PIXEL_MOTION)
         {
-            PRINT("FOUND A TARGET!");
-            motionhelper_t helper = GetBoundsFromMotion(motion, w, h, x, y);
+            motionhelper_t* helper = GetBoundsFromMotion(motion, w, h, x, y);
 
             target_t* targ = new target_t;
-            targ->x = (float)helper.MinX / (float)w;
-            targ->y = (float)helper.MinY / (float)h;
-            targ->width = (float)(helper.MaxX - targ->x) / (float)w;
-            targ->height = (float)(helper.MaxY - targ->y) / (float)h;
-            m_pTargets[++count] = targ;
+            targ->x = (float)helper->MinX / (float)w;
+            targ->y = (float)helper->MinY / (float)h;
+            targ->width = (float)(helper->MaxX - targ->x) / (float)w;
+            targ->height = (float)(helper->MaxY - targ->y) / (float)h;
+
+            delete helper;
+
+            if(targ->height + targ->width < m_flMinTargSize)
+            {
+                delete targ; // Pfft, this target is too small
+                continue;
+            }
+
+            m_pTargets[count++] = targ;
         }
     }
+
     m_iTargets = count;
     m_pLastImage->DeRefrence();
     m_pLastImage = pImage->Exclusive();
     delete motion;
+
     return false;
 }
 
@@ -208,9 +221,9 @@ int CDetector::GetTargets(target_t* Targets[MAX_TARGETS])
     if(!m_pTargets)
         return 0;
 
-    *Targets = new target_t[MAX_TARGETS];
-    memcpy(Targets, m_pTargets, sizeof(*Targets));
-    return 1;
+    for(int i = 0; i < MAX_TARGETS; i++)
+        Targets[i] = m_pTargets[i];
+    return m_iTargets;
 }
 
 int CDetector::GetNumberOfTargets()
@@ -221,4 +234,9 @@ int CDetector::GetNumberOfTargets()
 void CDetector::SetDiffrenceThreshold(short sAmmount)
 {
     m_sDiffrenceThreshold = sAmmount;
+}
+
+void CDetector::SetMinTargSize(float flAmmount)
+{
+    m_flMinTargSize = flAmmount;
 }
