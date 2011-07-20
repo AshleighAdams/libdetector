@@ -1,5 +1,11 @@
 #ifndef LIB_DET_INTERFACE_H
 #define LIB_DET_INTERFACE_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include "string.h"
+
 #define MAX_TARGETS 25 // 25 Seems enough, want more? recompile
 
 struct imagesize_t
@@ -31,22 +37,62 @@ struct pixel_t
     unsigned char b;
 };
 
-class CDetectorImage
+
+template <class myType>
+myType GetMax (myType a, myType b) {
+ return (a>b?a:b);
+}
+class CDetectorImmutable
+{
+public:
+    void Refrence(void)
+    {
+        m_iRefrenceCount++;
+    };
+    void DeRefrence(void)
+    {
+        m_iRefrenceCount--;
+        if(m_iRefrenceCount == 0)
+            delete this;
+    };
+protected:
+    int m_iRefrenceCount;
+};
+
+
+class CDetectorImage : public CDetectorImmutable
 {
 public:
     CDetectorImage(int Width, int Height)
     {
+        this->Refrence();
         m_sSize.width = Width;
         m_sSize.height = Height;
-        m_psPixels = new pixel_t[Width * Height];
+        m_psPixels = new pixel_t[Width + Width * Height];
+    };
+    CDetectorImage(imagesize_t size)
+    {
+        this->Refrence();
+        m_sSize.width = size.width;
+        m_sSize.height = size.height;
+        m_psPixels = new pixel_t[size.width + size.width * size.height];
     };
     ~CDetectorImage()
     {
         delete[] m_psPixels;
     };
-    void Pixel(int x, int y, pixel_t *Pixel)
+    CDetectorImage* Exclusive()
     {
-        Pixel = &m_psPixels[x + y * m_sSize.width];
+        if(m_iRefrenceCount == 1)
+            return this;
+        CDetectorImage* ptr = new CDetectorImage(this->GetSize());
+        memcpy(ptr->m_psPixels, this->m_psPixels, sizeof(this->m_psPixels));
+        this->DeRefrence();
+        return ptr;
+    };
+    pixel_t* Pixel(int x, int y)
+    {
+        return &m_psPixels[x + y * m_sSize.width];
     };
     imagesize_t GetSize()
     {
