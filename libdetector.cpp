@@ -211,6 +211,8 @@ bool CDetector::PushImage(CDetectorImage* pImage)
     m_iTargets = count;
     m_pLastImage->DeRefrence();
     m_pLastImage = pImage->Exclusive();
+
+    delete [] motion->motion;
     delete motion;
 
     return false;
