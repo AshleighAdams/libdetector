@@ -10,7 +10,7 @@ public:
     CDetector(imagesize_t Size);
     ~CDetector();
     // Push the next image here, calculates the new target
-    void PushImage(CDetectorImage *Image);
+    bool PushImage(CDetectorImage *Image);
     // Returns the number of targets, outputs to argument
     int GetTargets(target_t* Targets[MAX_TARGETS]);
     int GetNumberOfTargets();

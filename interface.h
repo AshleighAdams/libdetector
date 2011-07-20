@@ -13,6 +13,9 @@ struct imagesize_t
     int width;
     int height;
 };
+
+bool imagesize_tEqual(imagesize_t a, imagesize_t b);
+
 // Provides a byte for each pixel
 struct motion_t
 {
@@ -37,11 +40,6 @@ struct pixel_t
     unsigned char b;
 };
 
-
-template <class myType>
-myType GetMax (myType a, myType b) {
- return (a>b?a:b);
-}
 class CDetectorImmutable
 {
 public:
@@ -85,8 +83,10 @@ public:
     {
         if(m_iRefrenceCount == 1)
             return this;
-        CDetectorImage* ptr = new CDetectorImage(this->GetSize());
-        memcpy(ptr->m_psPixels, this->m_psPixels, sizeof(this->m_psPixels));
+        imagesize_t selfsize = this->GetSize();
+        int size_total = (selfsize.width + selfsize.width * selfsize.height) * 3; // 3 bytes per pixel;
+        CDetectorImage* ptr = new CDetectorImage(selfsize);
+        memcpy(ptr->m_psPixels, this->m_psPixels, size_total);
         this->DeRefrence();
         return ptr;
     };
@@ -115,7 +115,7 @@ class IDetector
 {
 public:
     // Push the next image here, calculates the new target
-    virtual void PushImage(CDetectorImage *Image) = 0;
+    virtual bool PushImage(CDetectorImage *Image) = 0;
     // Returns the number of targets, outputs to argument
     virtual int GetTargets(target_t* Targets[MAX_TARGETS]) = 0;
 };

@@ -1,5 +1,6 @@
 #include "string.h"
 #include <iostream>
+#include <exception>
 
 #include "libdetector.h"
 
@@ -14,7 +15,10 @@
 #define PIXEL_MOTION 1
 #define PIXEL_SCANNEDMOTION 2
 
-
+bool imagesize_tEqual(imagesize_t a, imagesize_t b)
+{
+    return a.width == b.width && a.height == b.height;
+}
 
 unsigned char DiffrenceBetween(unsigned char a, unsigned char b)
 {
@@ -25,7 +29,7 @@ unsigned char DiffrenceBetween(unsigned char a, unsigned char b)
 
 motion_t* AbsoluteDiffrence(CDetector* self, CDetectorImage* img1, CDetectorImage* img2)
 {
-    motion_t* motion = new motion_t;
+    motion_t* motion = new motion_t();
     motion->size = img1->GetSize();
     int w,h;
     w = motion->size.width;
@@ -154,14 +158,17 @@ CDetector::~CDetector()
     delete m_pLastImage;
 }
 
-void CDetector::PushImage(CDetectorImage* pImage)
+bool CDetector::PushImage(CDetectorImage* pImage)
 {
+    if(!imagesize_tEqual(pImage->GetSize(), m_sSize))
+        return false;
     pImage->Refrence();
     if(!m_pLastImage)
     {
         m_pLastImage = pImage->Exclusive();
-        return;
+        return false;
     }
+
     // Clear the target cache
     for(int i = 0; i < MAX_TARGETS; i++)
     {
@@ -193,6 +200,7 @@ void CDetector::PushImage(CDetectorImage* pImage)
     m_pLastImage->DeRefrence();
     m_pLastImage = pImage->Exclusive();
     delete motion;
+    return false;
 }
 
 int CDetector::GetTargets(target_t* Targets[MAX_TARGETS])
