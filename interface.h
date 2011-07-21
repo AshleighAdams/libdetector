@@ -48,7 +48,7 @@ public:
     {
         m_iRefrenceCount++;
     };
-    void DeRefrence(void)
+    void UnRefrence(void)
     {
         m_iRefrenceCount--;
         if(m_iRefrenceCount == 0)
@@ -88,7 +88,7 @@ public:
         int size_total = (selfsize.width + selfsize.width * selfsize.height) * 3; // 3 bytes per pixel;
         CDetectorImage* ptr = new CDetectorImage(selfsize);
         memcpy(ptr->m_psPixels, this->m_psPixels, size_total);
-        this->DeRefrence();
+        this->UnRefrence();
         return ptr;
     };
     pixel_t* Pixel(int x, int y)
