@@ -68,7 +68,6 @@ public:
         m_sSize.width = Width;
         m_sSize.height = Height;
         m_psPixels = new pixel_t[Width + Width * Height];
-        std::cout << "CREATED IMG\n";
     };
     CDetectorImage(imagesize_t size)
     {
@@ -76,11 +75,9 @@ public:
         m_sSize.width = size.width;
         m_sSize.height = size.height;
         m_psPixels = new pixel_t[size.width + size.width * size.height];
-        std::cout << "CREATED IMG\n";
     };
     ~CDetectorImage()
     {
-        std::cout << "DELETED IMG\n";
         delete[] m_psPixels;
     };
     CDetectorImage* Exclusive()
