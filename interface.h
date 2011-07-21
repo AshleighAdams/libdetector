@@ -10,11 +10,11 @@
 
 struct imagesize_t
 {
-    int width;
-    int height;
+	int width;
+	int height;
 };
 
-bool imagesize_tEqual(imagesize_t a, imagesize_t b);
+bool imagesize_tEqual( imagesize_t a, imagesize_t b );
 
 // Provides a byte for each pixel
 struct motion_t
@@ -25,100 +25,100 @@ struct motion_t
 
 struct motionhelper_t
 {
-    imagesize_t size;
-    int MinX;
-    int MinY;
-    int MaxX;
-    int MaxY;
-    unsigned char* motion;
+	imagesize_t size;
+	int MinX;
+	int MinY;
+	int MaxX;
+	int MaxY;
+	unsigned char* motion;
 };
 
 struct pixel_t
 {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
+	unsigned char r;
+	unsigned char g;
+	unsigned char b;
 };
 
 class CDetectorImmutable
 {
 public:
-    virtual ~CDetectorImmutable(){}; // GARH, this is so out real destructor is called!
-    void Refrence(void)
-    {
-        m_iRefrenceCount++;
-    };
-    void UnRefrence(void)
-    {
-        m_iRefrenceCount--;
-        if(m_iRefrenceCount == 0)
-            delete this;
-    };
+	virtual ~CDetectorImmutable() {}; // GARH, this is so out real destructor is called!
+	void Refrence( void )
+	{
+		m_iRefrenceCount++;
+	};
+	void UnRefrence( void )
+	{
+		m_iRefrenceCount--;
+		if( m_iRefrenceCount == 0 )
+			delete this;
+	};
 protected:
-    int m_iRefrenceCount;
+	int m_iRefrenceCount;
 };
 
 
 class CDetectorImage : public CDetectorImmutable
 {
 public:
-    CDetectorImage(int Width, int Height)
-    {
-        this->Refrence();
-        m_sSize.width = Width;
-        m_sSize.height = Height;
-        m_psPixels = new pixel_t[Width + Width * Height];
-    };
-    CDetectorImage(imagesize_t size)
-    {
-        this->Refrence();
-        m_sSize.width = size.width;
-        m_sSize.height = size.height;
-        m_psPixels = new pixel_t[size.width + size.width * size.height];
-    };
-    ~CDetectorImage()
-    {
-        delete[] m_psPixels;
-    };
-    CDetectorImage* Exclusive()
-    {
-        if(m_iRefrenceCount == 1)
-            return this;
-        imagesize_t selfsize = this->GetSize();
-        int size_total = (selfsize.width + selfsize.width * selfsize.height) * 3; // 3 bytes per pixel;
-        CDetectorImage* ptr = new CDetectorImage(selfsize);
-        memcpy(ptr->m_psPixels, this->m_psPixels, size_total);
-        this->UnRefrence();
-        return ptr;
-    };
-    pixel_t* Pixel(int x, int y)
-    {
-        return &m_psPixels[x + y * m_sSize.width];
-    };
-    imagesize_t GetSize()
-    {
-        return m_sSize;
-    };
+	CDetectorImage( int Width, int Height )
+	{
+		this->Refrence();
+		m_sSize.width = Width;
+		m_sSize.height = Height;
+		m_psPixels = new pixel_t[Width + Width * Height];
+	};
+	CDetectorImage( imagesize_t size )
+	{
+		this->Refrence();
+		m_sSize.width = size.width;
+		m_sSize.height = size.height;
+		m_psPixels = new pixel_t[size.width + size.width * size.height];
+	};
+	~CDetectorImage()
+	{
+		delete[] m_psPixels;
+	};
+	CDetectorImage* Exclusive()
+	{
+		if( m_iRefrenceCount == 1 )
+			return this;
+		imagesize_t selfsize = this->GetSize();
+		int size_total = ( selfsize.width + selfsize.width * selfsize.height ) * 3; // 3 bytes per pixel;
+		CDetectorImage* ptr = new CDetectorImage( selfsize );
+		memcpy( ptr->m_psPixels, this->m_psPixels, size_total );
+		this->UnRefrence();
+		return ptr;
+	};
+	pixel_t* Pixel( int x, int y )
+	{
+		return &m_psPixels[x + y * m_sSize.width];
+	};
+	imagesize_t GetSize()
+	{
+		return m_sSize;
+	};
 private:
-    imagesize_t m_sSize;
-    pixel_t* m_psPixels;
+	imagesize_t m_sSize;
+	pixel_t* m_psPixels;
 };
 
 struct target_t
 {
-    float x;
-    float y;
-    float width;
-    float height;
+	float x;
+	float y;
+	float width;
+	float height;
 };
 
 class IDetector
 {
 public:
-    // Push the next image here, calculates the new target
-    virtual bool PushImage(CDetectorImage *Image) = 0;
-    // Returns the number of targets, outputs to argument
-    virtual int GetTargets(target_t* Targets[MAX_TARGETS]) = 0;
+	// Push the next image here, calculates the new target
+	virtual bool PushImage( CDetectorImage* Image ) = 0;
+	// Returns the number of targets, outputs to argument
+	virtual int GetTargets( target_t* Targets[MAX_TARGETS] ) = 0;
 };
 
 
