@@ -205,8 +205,12 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			}
 
 			m_pTargets[count++] = targ;
+			if(count == MAX_TARGETS) // Max targets have been reached, just escape the loop
+                goto EndLoop;
 		}
 	}
+
+	EndLoop:
 
 	m_iTargets = count;
 	m_pLastImage->UnRefrence();
