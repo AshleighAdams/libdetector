@@ -31,4 +31,9 @@ private:
 
 motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );
 
+class CObjectTracker : public IDetectorObjectTracker
+{
+
+}
+
 #endif // LIB_DET_H

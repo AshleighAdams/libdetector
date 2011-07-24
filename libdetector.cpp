@@ -44,9 +44,6 @@ motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorIma
 		pix1 = img1->Pixel( x, y );
 		pix2 = img2->Pixel( x, y );
 
-		unsigned char pix1_r = pix1->r;
-		unsigned char pix2_r = pix2->r;
-
 		unsigned char diff_r = DiffrenceBetween( pix1->r, pix2->r );
 		unsigned char diff_g = DiffrenceBetween( pix1->g, pix2->g );
 		unsigned char diff_b = DiffrenceBetween( pix1->b, pix2->b );
@@ -246,3 +243,36 @@ void CDetector::SetMinTargSize( float flAmmount )
 {
 	m_flMinTargSize = flAmmount;
 }
+
+
+/// Tracked object stuff
+
+CTrackedObject::CTrackedObject(imagesize_t ImgSize, targetid ID)
+{
+    m_ImageSize = ImgSize;
+    m_tiID = ID;
+}
+
+CTrackedObject::~CDetectorBaseClass()
+{} // Unused for now
+
+double CTrackedObject::LastSeen()
+{
+    return m_dblLastSeen;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

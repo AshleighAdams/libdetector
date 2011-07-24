@@ -4,7 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include "string.h"
+#include <time.h>
+#include <string.h>
+#include <vector>
 
 #define MAX_TARGETS 25 // 25 Seems enough, want more? recompile
 
@@ -40,10 +42,10 @@ struct pixel_t
 	unsigned char b;
 };
 
-class CDetectorImmutable
+class CDetectorBaseClass
 {
 public:
-	virtual ~CDetectorImmutable() {}; // GARH, this is so out real destructor is called!
+	virtual ~CDetectorBaseClass() {}; // GARH, this is so out real destructor is called!
 	void Refrence( void )
 	{
 		m_iRefrenceCount++;
@@ -59,7 +61,7 @@ protected:
 };
 
 
-class CDetectorImage : public CDetectorImmutable
+class CDetectorImage : public CDetectorBaseClass // Immutable
 {
 public:
 	CDetectorImage( int Width, int Height )
@@ -112,7 +114,7 @@ struct target_t
 	float height;
 };
 
-class IDetector
+class IDetector : public CDetectorBaseClass
 {
 public:
 	// Push the next image here, calculates the new target
@@ -121,5 +123,70 @@ public:
 	virtual int GetTargets( target_t* Targets[MAX_TARGETS] ) = 0;
 };
 
+struct velocity_t
+{
+    float x;
+    float y;
+};
+
+struct position_t
+{
+	float x;
+	float y;
+};
+
+#define NANOSECONDS_IN_SECOND (1000000000)
+class CCurrentTime
+{
+public:
+    CCurrentTime()
+    {
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        double curtime = (double)now.tv_sec * + (double)(now.tv_nsec / NANOSECONDS_IN_SECOND);
+        m_dblStartTime = curtime;
+    };
+    double GetCurrentTime()
+    {
+        struct timespec now;
+        clock_gettime(CLOCK_MONOTONIC, &now);
+        double curtime = (double)now.tv_sec * + ((double)now.tv_nsec / (double)NANOSECONDS_IN_SECOND);
+        return curtime - m_dblStartTime;
+    };
+private:
+    m_dblStartTime;
+} CurrentTime;
+
+
+class IDetectorObjectTracker;
+
+typedef unsigned int targetid;
+class CTrackedObject : public CDetectorBaseClass
+{
+    friend class IDetectorObjectTracker;
+public:
+	CTrackedObject(imagesize_t ImgSize, targetid ID );
+	~CTrackedObject();
+	targetid    ID();
+	position_t  Position();
+	velocity_t  Velocity();
+	double      LastSeen();
+private:
+    void        UpdatePosition(position_t Pos);
+    imagesize_t m_ImageSize;
+    targetid    m_tiID;
+    velocity_t  m_sVelocity;
+    position_t  m_sPosition;
+    double      m_dblLastSeen;
+};
+
+typedef std::vector<CTrackedObject*> TrackedObjects;
+
+class IDetectorObjectTracker : public CDetectorBaseClass
+{
+public:
+    virtual void PushTargets( target_t* Targets[MAX_TARGETS], int Count ) = 0;
+    virtual TrackedObjects* GetTrackedObjects() = 0;
+};
 
 #endif // LIB_DET_INTERFACE_H
