@@ -3,6 +3,7 @@
 #include <exception>
 
 #include "libdetector.h"
+using namespace Detector;
 
 // Helper crap to save time
 #define MOTION_XY(_struct_, x, y) _struct_.motion[(x) + (y) * _struct_.size.width]
@@ -15,7 +16,7 @@
 #define PIXEL_MOTION 1
 #define PIXEL_SCANNEDMOTION 2
 
-bool imagesize_tEqual( imagesize_t a, imagesize_t b )
+bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
 {
 	return a.width == b.width && a.height == b.height;
 }
@@ -27,7 +28,7 @@ unsigned char DiffrenceBetween( unsigned char a, unsigned char b )
 	return ( unsigned char )x;
 }
 
-motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 )
+motion_t* Detector::AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 )
 {
 	motion_t* motion = new motion_t();
 	motion->size = img1->GetSize();
@@ -253,7 +254,7 @@ CTrackedObject::CTrackedObject(imagesize_t ImgSize, targetid ID)
     m_tiID = ID;
 }
 
-CTrackedObject::~CDetectorBaseClass()
+CTrackedObject::~CTrackedObject()
 {} // Unused for now
 
 double CTrackedObject::LastSeen()

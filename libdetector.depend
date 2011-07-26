@@ -1,15 +1,18 @@
 # depslib dependency file v1.0
-1311177513 source:/home/c0bra/CODEBLOCKS/libdetector/libdetector.cpp
+1311718733 source:/home/c0bra/CODEBLOCKS/libdetector/libdetector.cpp
 	"string.h"
 	<iostream>
+	<exception>
 	"libdetector.h"
 
-1311159209 /home/c0bra/CODEBLOCKS/libdetector/libdetector.h
+1311718532 /home/c0bra/CODEBLOCKS/libdetector/libdetector.h
 	"interface.h"
 
-1311179194 /home/c0bra/CODEBLOCKS/libdetector/interface.h
+1311721227 /home/c0bra/CODEBLOCKS/libdetector/interface.h
 	<stdio.h>
 	<stdlib.h>
 	<iostream>
-	"string.h"
+	<time.h>
+	<string.h>
+	<vector>
 
