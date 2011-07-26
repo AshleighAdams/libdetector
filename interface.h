@@ -143,25 +143,7 @@ namespace Detector
         float y;
     };
 
-    #define NANOSECONDS_IN_SECOND (1000000000)
-    class CCurrentTime
-    {
-    public:
-        CCurrentTime()
-        {
-            m_dblStartTime = GetCurrentTime();
-        };
-        double GetCurrentTime()
-        {
-            struct timespec now;
-            clock_gettime(CLOCK_MONOTONIC, &now);
-
-            double curtime = (double)(now.tv_nsec / CLOCKS_PER_SEC) / 1000.0 + (double)now.tv_sec;
-            return curtime - m_dblStartTime;
-        };
-    private:
-        double m_dblStartTime;
-    } static CurrentTime;
+    double GetCurrentTime();
 
     class IDetectorObjectTracker;
 

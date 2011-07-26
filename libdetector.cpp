@@ -16,6 +16,14 @@ using namespace Detector;
 #define PIXEL_MOTION 1
 #define PIXEL_SCANNEDMOTION 2
 
+double Detector::GetCurrentTime()
+{
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+
+    return (double)(now.tv_nsec / CLOCKS_PER_SEC) / 1000.0 + (double)now.tv_sec;
+}
+
 bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
 {
 	return a.width == b.width && a.height == b.height;
