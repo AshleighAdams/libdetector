@@ -160,6 +160,7 @@ namespace Detector
         double      LastSeen();
     private:
         void        UpdatePosition(position_t Pos);
+        void        SimulateUpdate(); // If the target was not found
         imagesize_t m_ImageSize;
         targetid    m_tiID;
         velocity_t  m_sVelocity;
@@ -169,7 +170,7 @@ namespace Detector
 
     typedef std::vector<CTrackedObject*> TrackedObjects;
 
-    class IDetectorObjectTracker : public CDetectorBaseClass
+    class IObjectTracker : public CDetectorBaseClass
     {
     public:
         virtual void PushTargets( target_t* Targets[MAX_TARGETS], int Count ) = 0;

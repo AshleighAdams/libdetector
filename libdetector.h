@@ -3,7 +3,7 @@
 
 #define _DET_INTERFACE_LOAD
 #include "interface.h"
-using namespace Detector;
+
 namespace Detector
 {
     class CDetector : public IDetector
@@ -34,9 +34,17 @@ namespace Detector
 
     motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );
 
-    class CObjectTracker : public IDetectorObjectTracker
+    class CObjectTracker : public IObjectTracker
     {
-
+    public:
+        CObjectTracker();
+        ~CObjectTracker();
+        void PushTargets( target_t* Targets[MAX_TARGETS], int Count );
+        TrackedObjects* GetTrackedObjects();
+        void SetLastSeenLifeTime(float flAmmount); // The target will still exist and simulate if the target goes out of view
+    private:
+        float               m_flLastSeenLifeTime;
+        TrackedObjects      m_toTrackedObjects;
     };
 } // End Namespace
 

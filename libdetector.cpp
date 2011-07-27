@@ -341,8 +341,23 @@ double CTrackedObject::LastSeen()
 	return m_dblLastSeen;
 }
 
+void CTrackedObject::UpdatePosition(position_t pos)
+{
+    float velx = pos.x - m_sPosition.x;
+    float vely = pos.y - m_sPosition.y;
+    m_sPosition = pos;
+    m_sVelocity.x = velx;
+    m_sVelocity.y = vely;
+    m_dblLastSeen = GetCurrentTime();
+}
 
+void CTrackedObject::SimulateUpdate()
+{
+    m_sPosition.x += m_sVelocity.x;
+    m_sPosition.y += m_sVelocity.y;
+}
 
+// End tracked object stuff
 
 
 
