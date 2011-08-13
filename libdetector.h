@@ -44,7 +44,8 @@ namespace Detector
         void SetLastSeenLifeTime(float flAmmount); // The target will still exist and simulate if the target goes out of view
     private:
         float               m_flLastSeenLifeTime;
-        TrackedObjects      m_toTrackedObjects;
+        TrackedObjects      m_TrackedObjects;
+        int m_CurrentID;
     };
 } // End Namespace
 

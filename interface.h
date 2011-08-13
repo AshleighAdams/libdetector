@@ -12,6 +12,7 @@
 #include <time.h>
 #include <string.h>
 #include <vector>
+#include <list>
 
 #define MAX_TARGETS 25 // 25 Seems enough, want more? recompile
 
@@ -158,6 +159,7 @@ namespace Detector
         position_t  Position();
         velocity_t  Velocity();
         double      LastSeen();
+        bool operator ==(CTrackedObject* a);
     private:
         void        UpdatePosition(position_t Pos);
         void        SimulateUpdate(); // If the target was not found
@@ -168,7 +170,7 @@ namespace Detector
         double      m_dblLastSeen;
     };
 
-    typedef std::vector<CTrackedObject*> TrackedObjects;
+    typedef std::list<CTrackedObject*> TrackedObjects;
 
     class IObjectTracker : public CDetectorBaseClass
     {

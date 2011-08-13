@@ -357,9 +357,34 @@ void CTrackedObject::SimulateUpdate()
     m_sPosition.y += m_sVelocity.y;
 }
 
+bool CTrackedObject::operator==(CTrackedObject* a)
+{
+    return a->m_tiID == this->m_tiID;
+}
+
 // End tracked object stuff
 
+CObjectTracker::CObjectTracker()
+{
+}
 
+CObjectTracker::~CObjectTracker()
+{
+}
+
+void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
+{
+}
+
+TrackedObjects* CObjectTracker::GetTrackedObjects()
+{
+    return &m_TrackedObjects;
+}
+
+void CObjectTracker::SetLastSeenLifeTime(float flAmmount)
+{
+    m_flLastSeenLifeTime = flAmmount;
+}
 
 
 
