@@ -144,6 +144,14 @@ namespace Detector
         float y;
     };
 
+    float Distance(position_t &a, position_t &b);
+
+    struct ssize_t
+    {
+        float w;
+        float h;
+    };
+
     double GetCurrentTime();
 
     class IDetectorObjectTracker;
@@ -153,17 +161,18 @@ namespace Detector
     {
         friend class IDetectorObjectTracker;
     public:
-        CTrackedObject(imagesize_t ImgSize, targetid ID );
+        CTrackedObject( targetid ID );
         ~CTrackedObject();
         targetid    ID();
         position_t  Position();
         velocity_t  Velocity();
         double      LastSeen();
+        float       GetScore(target_t* Target);
         bool operator ==(CTrackedObject* a);
     private:
-        void        UpdatePosition(position_t Pos);
+        void        Update(position_t& pos, ssize_t& size);
         void        SimulateUpdate(); // If the target was not found
-        imagesize_t m_ImageSize;
+        ssize_t     m_sSize;
         targetid    m_tiID;
         velocity_t  m_sVelocity;
         position_t  m_sPosition;

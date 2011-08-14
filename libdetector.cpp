@@ -1,6 +1,7 @@
 #include "string.h"
 #include <iostream>
 #include <exception>
+#include <cmath>
 
 #include "libdetector.h"
 using namespace Detector;
@@ -326,10 +327,8 @@ void CDetector::SetMinTargSize( float flAmmount )
 
 
 /// Tracked object stuff
-
-CTrackedObject::CTrackedObject( imagesize_t ImgSize, targetid ID )
+CTrackedObject::CTrackedObject( targetid ID )
 {
-	m_ImageSize = ImgSize;
 	m_tiID = ID;
 }
 
@@ -341,13 +340,17 @@ double CTrackedObject::LastSeen()
 	return m_dblLastSeen;
 }
 
-void CTrackedObject::UpdatePosition(position_t pos)
+void CTrackedObject::Update(position_t& pos, ssize_t& size)
 {
     float velx = pos.x - m_sPosition.x;
     float vely = pos.y - m_sPosition.y;
     m_sPosition = pos;
     m_sVelocity.x = velx;
     m_sVelocity.y = vely;
+
+    m_sSize.w = size.w;
+    m_sSize.h = size.h;
+
     m_dblLastSeen = GetCurrentTime();
 }
 
@@ -362,10 +365,57 @@ bool CTrackedObject::operator==(CTrackedObject* a)
     return a->m_tiID == this->m_tiID;
 }
 
+float CTrackedObject::GetScore(target_t* Target)
+{
+    position_t targpos;
+    targpos.x = Target->x;
+    targpos.y = Target->y;
+
+
+    float score_pos = 1.0f - std::min(1.0f, Distance(m_sPosition, targpos) / 0.3f); // score algo with max being 1 for all of them
+
+    float size_x = 1.0f - std::min(1.0f, std::abs(m_sSize.w - Target->width) / 0.1f); // About 10% of the image error
+    float size_y = 1.0f - std::min(1.0f, std::abs(m_sSize.h - Target->height) / 0.1f);
+
+    float score_size = (size_x + size_y) / 2.0f;
+    //float score_vel = (vel_x + vel_y) / 2f;
+
+    return (((score_pos + score_size) / 2.0f) * 100.0f);
+}
+
 // End tracked object stuff
+
+// Object tracker stuff
+
+// Stuff that's usefull to the tracker
+float Q_sqrt( float number ) // Thanks whoever made this (this implentation is from Quake III Arena)
+{
+    long i;
+    float x, y;
+    const float f = 1.5F;
+
+    x = number * 0.5F;
+    y  = number;
+    i  = * ( long * ) &y;
+    i  = 0x5f3759df - ( i >> 1 );
+    y  = * ( float * ) &i;
+    y  = y * ( f - ( x * y * y ) );
+    y  = y * ( f - ( x * y * y ) );
+    return number * y;
+}
+
+float Distance(position_t& a, position_t& b)
+{
+    float x = std::abs(a.x - b.x);
+    float y = std::abs(a.y - b.y);
+
+    return Q_sqrt(x*x+y*y);
+}
 
 CObjectTracker::CObjectTracker()
 {
+    m_flLastSeenLifeTime = 0.5f;
+    m_flNewTargetThreshold = 90.0f;
 }
 
 CObjectTracker::~CObjectTracker()
@@ -374,6 +424,107 @@ CObjectTracker::~CObjectTracker()
 
 void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
 {
+    if(Count > MAX_TARGETS -1) return; // Just an assertion
+    for(int i = 0; i < Count; i++)
+    {
+        target_t* Target = Targets[i];
+        float bestscore = 0.0f;
+        CTrackedObject* best;
+
+        for(CTrackedObject* Obj : m_TrackedObjects)
+        //for(TrackedObjects::iterator it = m_TrackedObjects.begin(); it != m_TrackedObjects.end(); ++it)
+        {
+
+        }
+    }
+    /*
+
+
+    int count = 0; // wether we got anything or nothing
+            foreach (Target t in _targets)
+            {
+                int best_score = 0;     // does this object have a target to belong to? well find out with these vars for later checking
+                ObjectTracked best_scorer = null;
+                int score;
+                foreach (ObjectTracked obj in ObjectsTracked)
+                {
+                    score = obj.GetScore(t);
+                    if (score > _min_score) // we will check if its more than the threshhold later
+                    {
+                        best_score = score;
+                        best_scorer = obj;
+                    }
+                }
+                if (best_score > _min_score)
+                {
+                    best_scorer.PositionWasFaked = false;
+                    best_scorer.Position = new Point(t.X, t.Y);
+                    best_scorer.Size = new Rectangle(t.SizeX, t.SizeY, 0, 0);
+                    best_scorer.Score = best_score;
+                    ObjectTrackedArgs args = new ObjectTrackedArgs(best_scorer);
+                    UpdateTrackedObject(args);
+                }
+                else
+                {
+                    ObjectTracked new_obj = new ObjectTracked(_i++,
+                        new Point(t.X, t.Y),
+                        new Rectangle(t.SizeX, t.SizeY, 0, 0),
+                        new Rectangle(0, 0, FrameSizeX, FrameSizeY)
+                        );
+
+                    ObjectsTracked.AddLast(new_obj);
+                    if (NewObjectTracked != null)
+                    {
+                        ObjectTrackedArgs args = new ObjectTrackedArgs(new_obj);
+                        NewObjectTracked(args);
+                    }
+                }
+            }
+            LinkedListNode<ObjectTracked> cur = ObjectsTracked.First;
+            int bigest_id = 0;
+            while (cur != null)
+            {
+                // check _i and make it as small as possible
+                if (cur.Value.ID > bigest_id)
+                    bigest_id = cur.Value.ID;
+
+                int ms_ago = (int)(DateTime.Now - cur.Value.LastSeen).TotalMilliseconds;
+                if (ms_ago <= _miliseconds_unseen_till_removed)
+                {
+                    retval.AddLast(cur.Value);
+                    count++;
+                }
+                else
+                {
+                    if (LostTrackedObject != null)
+                    {
+                        ObjectTrackedArgs args = new ObjectTrackedArgs(cur.Value);
+                        LostTrackedObject(args);
+                    }
+
+
+                    LinkedListNode<ObjectTracked> last = cur;
+                    cur = cur.Next;
+                    ObjectsTracked.Remove(last);
+                }
+
+                if (cur != null)
+                {
+                    cur = cur.Next;
+                }
+            }
+            _i = bigest_id + 1;
+
+            // Update positions / Velocity
+            foreach (ObjectTracked obj in ObjectsTracked)
+            {
+                if ((DateTime.Now - obj.LastSeen).TotalMilliseconds > 50.0)
+                {
+                    obj.FakeUpdatePos();
+                }
+            }
+
+            return retval;*/
 }
 
 TrackedObjects* CObjectTracker::GetTrackedObjects()

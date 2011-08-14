@@ -42,10 +42,12 @@ namespace Detector
         void PushTargets( target_t* Targets[MAX_TARGETS], int Count );
         TrackedObjects* GetTrackedObjects();
         void SetLastSeenLifeTime(float flAmmount); // The target will still exist and simulate if the target goes out of view
+        void SetNewTargetThreshold(float flAmmount);
     private:
         float               m_flLastSeenLifeTime;
+        float               m_flNewTargetThreshold;
         TrackedObjects      m_TrackedObjects;
-        int m_CurrentID;
+        targetid            m_CurrentID;
     };
 } // End Namespace
 
