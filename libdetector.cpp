@@ -429,34 +429,44 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
     {
         target_t* Target = Targets[i];
         float bestscore = m_flNewTargetThreshold;
-        CTrackedObject* best;
+        CTrackedObject* best = NULL;
 
         for(CTrackedObject* Obj : m_TrackedObjects) // Yay, 0x standard!
         {
             float score = Obj->GetScore(Target);
-            if(score > bestscore)
+            if(best)
             {
                 bestscore = score;
                 best = Obj;
             }
         }
 
+        position_t pos;
+        pos.x = Target->x;
+        pos.y = Target->y;
+
+        ssize_t size;
+        size.w = Target->width;
+        size.h = Target->height;
+
         if(bestscore > m_flNewTargetThreshold)
         {
-            position_t pos;
-            pos.x = Target->x;
-            pos.y = Target->y;
-
-            ssize_t size;
-            size.w = Target->width;
-            size.h = Target->height;
-
             best->Update(pos, size);
 
-            //TODO: Call lambada function (0x, gotta use them!)
+            //      TODO: Call lambada function (0x, gotta use them!)
+            // CObjectTracker::AddEvent(int Type; void* Func)
+            // tracker->AddEvent(Detector::EVENT_UPDATE, [&](CTrackedObject* Obj)
+            // {
+            //      DoStuff();
+            // });
         }
         else
         {
+            CTrackedObject* newobj = new CTrackedObject(m_CurrentID++);
+            newobj->Update(pos, size);
+
+            m_TrackedObjects.push_back(newobj);
+            // TODO: Call event
         }
     }
     /*

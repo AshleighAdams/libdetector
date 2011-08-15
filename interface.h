@@ -168,10 +168,10 @@ namespace Detector
         velocity_t  Velocity();
         double      LastSeen();
         float       GetScore(target_t* Target);
-        bool operator ==(CTrackedObject* a);
-    private:
         void        Update(position_t& pos, ssize_t& size);
         void        SimulateUpdate(); // If the target was not found
+        bool operator ==(CTrackedObject* a);
+    private:
         ssize_t     m_sSize;
         targetid    m_tiID;
         velocity_t  m_sVelocity;
