@@ -428,13 +428,35 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
     for(int i = 0; i < Count; i++)
     {
         target_t* Target = Targets[i];
-        float bestscore = 0.0f;
+        float bestscore = m_flNewTargetThreshold;
         CTrackedObject* best;
 
-        for(CTrackedObject* Obj : m_TrackedObjects)
-        //for(TrackedObjects::iterator it = m_TrackedObjects.begin(); it != m_TrackedObjects.end(); ++it)
+        for(CTrackedObject* Obj : m_TrackedObjects) // Yay, 0x standard!
         {
+            float score = Obj->GetScore(Target);
+            if(score > bestscore)
+            {
+                bestscore = score;
+                best = Obj;
+            }
+        }
 
+        if(bestscore > m_flNewTargetThreshold)
+        {
+            position_t pos;
+            pos.x = Target->x;
+            pos.y = Target->y;
+
+            ssize_t size;
+            size.w = Target->width;
+            size.h = Target->height;
+
+            best->Update(pos, size);
+
+            //TODO: Call lambada function (0x, gotta use them!)
+        }
+        else
+        {
         }
     }
     /*
