@@ -1,0 +1,5 @@
+Motion detection and object tracking solution.
+
+Include "libdetector.h" and link against "libdetector.(a/lib)"
+
+libdetector does not have any webcam capture features, you must convert to a CDetectorImage (You can memcpy it, or use the API (pixel_t* pix = x->Pixel() ))

@@ -1,3 +1,4 @@
+
 #include "string.h"
 #include <iostream>
 #include <exception>
@@ -469,49 +470,26 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
             // TODO: Call event
         }
     }
+
+    for(CTrackedObject* Obj : m_TrackedObjects)
+    {
+        double lastseen = Obj->LastSeen();
+        if(lastseen > 1000.0)
+        {
+            // TODO: Call event
+            m_TrackedObjects.remove(Obj);
+            Obj->UnRefrence();
+            continue;
+        }
+        else if (lastseen > 50.0) // Simulate stuff
+        {
+            // TODO: Call event
+            obj->SimulateUpdate();
+        }
+    }
     /*
 
 
-    int count = 0; // wether we got anything or nothing
-            foreach (Target t in _targets)
-            {
-                int best_score = 0;     // does this object have a target to belong to? well find out with these vars for later checking
-                ObjectTracked best_scorer = null;
-                int score;
-                foreach (ObjectTracked obj in ObjectsTracked)
-                {
-                    score = obj.GetScore(t);
-                    if (score > _min_score) // we will check if its more than the threshhold later
-                    {
-                        best_score = score;
-                        best_scorer = obj;
-                    }
-                }
-                if (best_score > _min_score)
-                {
-                    best_scorer.PositionWasFaked = false;
-                    best_scorer.Position = new Point(t.X, t.Y);
-                    best_scorer.Size = new Rectangle(t.SizeX, t.SizeY, 0, 0);
-                    best_scorer.Score = best_score;
-                    ObjectTrackedArgs args = new ObjectTrackedArgs(best_scorer);
-                    UpdateTrackedObject(args);
-                }
-                else
-                {
-                    ObjectTracked new_obj = new ObjectTracked(_i++,
-                        new Point(t.X, t.Y),
-                        new Rectangle(t.SizeX, t.SizeY, 0, 0),
-                        new Rectangle(0, 0, FrameSizeX, FrameSizeY)
-                        );
-
-                    ObjectsTracked.AddLast(new_obj);
-                    if (NewObjectTracked != null)
-                    {
-                        ObjectTrackedArgs args = new ObjectTrackedArgs(new_obj);
-                        NewObjectTracked(args);
-                    }
-                }
-            }
             LinkedListNode<ObjectTracked> cur = ObjectsTracked.First;
             int bigest_id = 0;
             while (cur != null)
