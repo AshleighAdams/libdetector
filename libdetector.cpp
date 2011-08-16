@@ -40,7 +40,7 @@ LARGE_INTEGER getFILETIMEoffset()
 	return t;
 }
 
-int clock_gettime( int X, struct timeval* tv )
+int ::clock_gettime( int X, struct timeval* tv )
 {
 	LARGE_INTEGER           t;
 	FILETIME                f;
@@ -351,6 +351,11 @@ void CTrackedObject::Update(position_t& pos, ssize_t& size)
     m_dblLastSeen = GetCurrentTime();
 }
 
+targetid CTrackedObject::ID()
+{
+    return m_tiID;
+}
+
 void CTrackedObject::SimulateUpdate()
 {
     m_sPosition.x += m_sVelocity.x;
@@ -406,7 +411,7 @@ float Q_sqrt( float number ) // Thanks whoever made this (this implentation is f
     return number * y;
 }
 
-float Distance(position_t& a, position_t& b)
+float Detector::Distance(position_t& a, position_t& b)
 {
     float x = std::abs(a.x - b.x);
     float y = std::abs(a.y - b.y);
