@@ -14,10 +14,6 @@ using namespace Detector;
 #define XY_LOOP(_w_,_h_) for(int y = 0; y < _h_; y++) for(int x = 0; x < _w_; x++)
 #define PRINT(_X_) std::cout << _X_ << '\n'
 
-#define PIXEL_NOMOTION 0
-#define PIXEL_MOTION 1
-#define PIXEL_SCANNEDMOTION 2
-
 #ifdef WINDOWS // We need a standard for this...
 /*
     Thanks to Carl Staelin for this snippet
@@ -388,6 +384,11 @@ float CTrackedObject::GetScore(target_t* Target)
 
 // Object tracker stuff
 
+NewTargetFn         NewTargEvent = NULL;
+UpdateTargetFn      UpdateEvent = NULL;
+LostTargetFn        LostTargEvent = NULL;
+
+
 // Stuff that's usefull to the tracker
 float Q_sqrt( float number ) // Thanks whoever made this (this implentation is from Quake III Arena)
 {
@@ -454,12 +455,8 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
         {
             best->Update(pos, size);
 
-            //      TODO: Call lambada function (0x, gotta use them!)
-            // CObjectTracker::AddEvent(int Type; void* Func)
-            // tracker->AddEvent(Detector::EVENT_UPDATE, [&](CTrackedObject* Obj)
-            // {
-            //      DoStuff();
-            // });
+            if(UpdateEvent)
+                UpdateEvent(best, false);
         }
         else
         {
@@ -467,74 +464,31 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
             newobj->Update(pos, size);
 
             m_TrackedObjects.push_back(newobj);
-            // TODO: Call event
+
+            if(NewTargEvent)
+                NewTargEvent(newobj);
         }
     }
 
     for(CTrackedObject* Obj : m_TrackedObjects)
     {
         double lastseen = Obj->LastSeen();
-        if(lastseen > 1000.0)
+        if(lastseen > 1000.0) // TODO: Make a var to control this
         {
-            // TODO: Call event
+            if(LostTargEvent)
+                LostTargEvent(Obj);
+
             m_TrackedObjects.remove(Obj);
             Obj->UnRefrence();
             continue;
         }
         else if (lastseen > 50.0) // Simulate stuff
         {
-            // TODO: Call event
-            obj->SimulateUpdate();
+            Obj->SimulateUpdate();
+            if(UpdateEvent)
+                UpdateEvent(Obj, true);
         }
     }
-    /*
-
-
-            LinkedListNode<ObjectTracked> cur = ObjectsTracked.First;
-            int bigest_id = 0;
-            while (cur != null)
-            {
-                // check _i and make it as small as possible
-                if (cur.Value.ID > bigest_id)
-                    bigest_id = cur.Value.ID;
-
-                int ms_ago = (int)(DateTime.Now - cur.Value.LastSeen).TotalMilliseconds;
-                if (ms_ago <= _miliseconds_unseen_till_removed)
-                {
-                    retval.AddLast(cur.Value);
-                    count++;
-                }
-                else
-                {
-                    if (LostTrackedObject != null)
-                    {
-                        ObjectTrackedArgs args = new ObjectTrackedArgs(cur.Value);
-                        LostTrackedObject(args);
-                    }
-
-
-                    LinkedListNode<ObjectTracked> last = cur;
-                    cur = cur.Next;
-                    ObjectsTracked.Remove(last);
-                }
-
-                if (cur != null)
-                {
-                    cur = cur.Next;
-                }
-            }
-            _i = bigest_id + 1;
-
-            // Update positions / Velocity
-            foreach (ObjectTracked obj in ObjectsTracked)
-            {
-                if ((DateTime.Now - obj.LastSeen).TotalMilliseconds > 50.0)
-                {
-                    obj.FakeUpdatePos();
-                }
-            }
-
-            return retval;*/
 }
 
 TrackedObjects* CObjectTracker::GetTrackedObjects()
@@ -547,13 +501,26 @@ void CObjectTracker::SetLastSeenLifeTime(float flAmmount)
     m_flLastSeenLifeTime = flAmmount;
 }
 
-
-
-
-
-
-
-
-
-
+// Events arn't done yet, only one event currently
+void CObjectTracker::SetEvent(EventType type, void* function)
+{
+    switch(type)
+    {
+        case EVENT_NEWTARG:
+        {
+            NewTargEvent = (NewTargetFn)(unsigned long)function;
+            break;
+        }
+        case EVENT_UPDATE:
+        {
+            UpdateEvent = (UpdateTargetFn)(unsigned long)function;
+            break;
+        }
+        case EVENT_LOST:
+        {
+            LostTargEvent = (LostTargetFn)(unsigned long)function;
+            break;
+        }
+    }
+}
 

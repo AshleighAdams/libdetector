@@ -16,3 +16,22 @@
 	<string.h>
 	<vector>
 
+1313500670 source:/home/c0bra/Projects/libdetector/libdetector.cpp
+	"string.h"
+	<iostream>
+	<exception>
+	<cmath>
+	"libdetector.h"
+
+1313431196 /home/c0bra/Projects/libdetector/libdetector.h
+	"interface.h"
+
+1313459795 /home/c0bra/Projects/libdetector/interface.h
+	<stdio.h>
+	<stdlib.h>
+	<iostream>
+	<time.h>
+	<string.h>
+	<vector>
+	<list>
+

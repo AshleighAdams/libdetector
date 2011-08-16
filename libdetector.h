@@ -6,6 +6,20 @@
 
 namespace Detector
 {
+    const int PIXEL_NOMOTION = 0;
+    const int PIXEL_MOTION = 1;
+    const int PIXEL_SCANNEDMOTION = 2;
+
+    typedef int EventType;
+    typedef void(*NewTargetFn)(CTrackedObject* Obj);
+    const EventType EVENT_NEWTARG = 0;
+
+    typedef void(*UpdateTargetFn)(CTrackedObject* Obj, bool Simulated);
+    const EventType EVENT_UPDATE = 1;
+
+    typedef void(*LostTargetFn)(CTrackedObject* Obj);
+    const EventType EVENT_LOST = 2;
+
     class CDetector : public IDetector
     {
         friend motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );
@@ -43,6 +57,7 @@ namespace Detector
         TrackedObjects* GetTrackedObjects();
         void SetLastSeenLifeTime(float flAmmount); // The target will still exist and simulate if the target goes out of view
         void SetNewTargetThreshold(float flAmmount);
+        void SetEvent(EventType type, void* function);
     private:
         float               m_flLastSeenLifeTime;
         float               m_flNewTargetThreshold;
