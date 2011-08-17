@@ -382,7 +382,7 @@ float CTrackedObject::GetScore(target_t* Target)
     float score_size = (size_x + size_y) / 2.0f;
     //float score_vel = (vel_x + vel_y) / 2f;
 
-    return (((score_pos + score_size) / 2.0f) * 100.0f);
+    return (((score_pos + score_size) / 2.0f));
 }
 
 // End tracked object stuff
@@ -422,7 +422,7 @@ float Detector::Distance(position_t& a, position_t& b)
 CObjectTracker::CObjectTracker()
 {
     m_flLastSeenLifeTime = 0.5f;
-    m_flNewTargetThreshold = 90.0f;
+    m_flNewTargetThreshold = 0.7f;
 }
 
 CObjectTracker::~CObjectTracker()
@@ -441,7 +441,7 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
         for(CTrackedObject* Obj : m_TrackedObjects) // Yay, 0x standard!
         {
             float score = Obj->GetScore(Target);
-            if(best)
+            if(score > bestscore)
             {
                 bestscore = score;
                 best = Obj;
@@ -456,7 +456,7 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
         size.w = Target->width;
         size.h = Target->height;
 
-        if(bestscore > m_flNewTargetThreshold)
+        if(bestscore > m_flNewTargetThreshold) // If the score is below the threshold then create a new target to match
         {
             best->Update(pos, size);
 
@@ -475,24 +475,41 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
         }
     }
 
+    CTrackedObject* RemoveNextIteration = NULL;
+
     for(CTrackedObject* Obj : m_TrackedObjects)
     {
-        double lastseen = Obj->LastSeen();
-        if(lastseen > 1000.0) // TODO: Make a var to control this
+        if(RemoveNextIteration)
+        {
+            m_TrackedObjects.remove(RemoveNextIteration);
+            RemoveNextIteration->UnRefrence();
+
+            RemoveNextIteration = NULL;
+        }
+
+        double lastseen = GetCurrentTime() - Obj->LastSeen();
+        if(lastseen > 1.0) // TODO: Make a var to control this
         {
             if(LostTargEvent)
                 LostTargEvent(Obj);
 
-            m_TrackedObjects.remove(Obj);
-            Obj->UnRefrence();
+            RemoveNextIteration = Obj; // Mark this to be removed next iterate (doing it now will cause a segfault)
             continue;
         }
-        else if (lastseen > 50.0) // Simulate stuff
+        else if (lastseen > 0.05) // Simulate stuff if we havn't seen for 50ms
         {
             Obj->SimulateUpdate();
             if(UpdateEvent)
                 UpdateEvent(Obj, true);
         }
+    }
+
+    if(RemoveNextIteration)
+    {
+        m_TrackedObjects.remove(RemoveNextIteration);
+        RemoveNextIteration->UnRefrence();
+
+        RemoveNextIteration = NULL;
     }
 }
 
