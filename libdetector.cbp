@@ -34,9 +34,9 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Unit filename="interface.h" />
-		<Unit filename="libdetector.cpp" />
-		<Unit filename="libdetector.h" />
+		<Unit filename="header/interface.h" />
+		<Unit filename="source/libdetector.cpp" />
+		<Unit filename="header/libdetector.h" />
 		<Extensions>
 			<code_completion />
 			<debugger />
