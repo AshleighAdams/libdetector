@@ -16,7 +16,7 @@ using namespace Detector;
     Thanks to Carl Staelin for this snippet
     http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
 */
-#define CLOCKS_PER_SEC 0
+//#define CLOCKS_PER_SEC 0
 LARGE_INTEGER getFILETIMEoffset()
 {
 	SYSTEMTIME s;
@@ -87,5 +87,11 @@ double Detector::GetCurrentTime()
 	struct timespec now;
 	clock_gettime( CLOCK_MONOTONIC, &now );
 
-	return ( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec;
+    // return ( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec; // Why was I deviding by 0?
+	return ( double )( now.tv_nsec ) / 1000.0 + ( double )now.tv_sec;
+}
+
+bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
+{
+	return a.width == b.width && a.height == b.height;
 }

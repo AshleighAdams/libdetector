@@ -35,11 +35,13 @@
 			</Target>
 		</Build>
 		<Unit filename="header/interface.h" />
-		<Unit filename="source/libdetector.cpp" />
 		<Unit filename="header/libdetector.h" />
+		<Unit filename="source/detector.cpp" />
+		<Unit filename="source/util.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

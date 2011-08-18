@@ -35,3 +35,24 @@
 	<vector>
 	<list>
 
+1313687905 source:/home/c0bra/Projects/libdetector/source/detector.cpp
+	"string.h"
+	<iostream>
+	<exception>
+	<cmath>
+	"../header/libdetector.h"
+
+1313517301 /home/c0bra/Projects/libdetector/header/libdetector.h
+	"interface.h"
+
+1313459795 /home/c0bra/Projects/libdetector/header/interface.h
+	<stdio.h>
+	<stdlib.h>
+	<iostream>
+	<time.h>
+	<string.h>
+	<vector>
+	<list>
+
+1313688075 source:/home/c0bra/Projects/libdetector/source/tracker.cpp
+
