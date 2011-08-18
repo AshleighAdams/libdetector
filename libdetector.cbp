@@ -37,7 +37,9 @@
 		<Unit filename="header/interface.h" />
 		<Unit filename="header/libdetector.h" />
 		<Unit filename="source/detector.cpp" />
+		<Unit filename="source/tracker.cpp" />
 		<Unit filename="source/util.cpp" />
+		<Unit filename="source/object.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

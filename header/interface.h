@@ -16,6 +16,20 @@
 
 #define MAX_TARGETS 25 // 25 Seems enough, want more? recompile
 
+#ifdef DETECTOR_INTERNAL
+
+
+// Helper crap to save time
+#define MOTION_XY(_struct_, x, y) _struct_.motion[(x) + (y) * _struct_.size.width]
+#define PMOTION_XY(_struct_, x, y) _struct_->motion[(x) + (y) * _struct_->size.width]
+
+#define XY_LOOP(_w_,_h_) for(int y = 0; y < _h_; y++) for(int x = 0; x < _w_; x++)
+#define PRINT(_X_) std::cout << _X_ << '\n'
+
+unsigned char DiffrenceBetween( unsigned char a, unsigned char b );
+
+#endif // DETECTOR_INTERNAL
+
 namespace Detector
 {
 

@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="source/libdetector.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="468" topLine="0" />
+	<File name="header/interface.h" open="1" top="0" tabpos="5">
+		<Cursor position="0" topLine="0" />
 	</File>
-	<File name="source/util.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="2243" topLine="61" />
+	<File name="header/libdetector.h" open="1" top="0" tabpos="4">
+		<Cursor position="0" topLine="12" />
+	</File>
+	<File name="source/detector.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="1" topLine="0" />
+	</File>
+	<File name="source/tracker.cpp" open="1" top="1" tabpos="3">
+		<Cursor position="2765" topLine="85" />
+	</File>
+	<File name="source/util.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="453" topLine="15" />
 	</File>
 </CodeBlocks_layout_file>
