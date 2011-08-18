@@ -8,76 +8,6 @@
 #include "../header/libdetector.h"
 using namespace Detector;
 
-/// Tracked object stuff
-CTrackedObject::CTrackedObject( targetid ID )
-{
-	m_tiID = ID;
-}
-
-CTrackedObject::~CTrackedObject()
-{} // Unused for now
-
-double CTrackedObject::LastSeen()
-{
-	return m_dblLastSeen;
-}
-
-void CTrackedObject::Update(position_t& pos, ssize_t& size)
-{
-    float velx = pos.x - m_sPosition.x;
-    float vely = pos.y - m_sPosition.y;
-    m_sPosition = pos;
-    m_sVelocity.x = velx;
-    m_sVelocity.y = vely;
-
-    m_sSize.w = size.w;
-    m_sSize.h = size.h;
-
-    m_dblLastSeen = GetCurrentTime();
-}
-
-targetid CTrackedObject::ID()
-{
-    return m_tiID;
-}
-
-void CTrackedObject::SimulateUpdate()
-{
-    m_sPosition.x += m_sVelocity.x;
-    m_sPosition.y += m_sVelocity.y;
-}
-
-bool CTrackedObject::operator==(CTrackedObject* a)
-{
-    return a->m_tiID == this->m_tiID;
-}
-
-float CTrackedObject::GetScore(target_t* Target)
-{
-    position_t targpos;
-    targpos.x = Target->x;
-    targpos.y = Target->y;
-
-
-    float score_pos = 1.0f - std::min(1.0f, Distance(m_sPosition, targpos) / 0.3f); // score algo with max being 1 for all of them
-
-    float size_x = 1.0f - std::min(1.0f, std::abs(m_sSize.w - Target->width) / 0.1f); // About 10% of the image error
-    float size_y = 1.0f - std::min(1.0f, std::abs(m_sSize.h - Target->height) / 0.1f);
-
-    float score_size = (size_x + size_y) / 2.0f;
-    //float score_vel = (vel_x + vel_y) / 2f;
-
-    return (((score_pos + score_size) / 2.0f));
-}
-
-// End tracked object stuff
-
-// Object tracker stuff
-
-NewTargetFn         NewTargEvent = NULL;
-UpdateTargetFn      UpdateEvent = NULL;
-LostTargetFn        LostTargEvent = NULL;
-
 
 // Stuff that's usefull to the tracker
 float Q_sqrt( float number ) // Thanks whoever made this (this implentation is from Quake III Arena)
@@ -106,8 +36,11 @@ float Detector::Distance(position_t& a, position_t& b)
 
 CObjectTracker::CObjectTracker()
 {
-    m_flLastSeenLifeTime = 0.5f;
-    m_flNewTargetThreshold = 0.7f;
+    m_flLastSeenLifeTime        = 0.5f;
+    m_flNewTargetThreshold      = 0.9f;
+    m_pNewTargEvent             = NULL;
+    m_pUpdateEvent              = NULL;
+    m_pLostTargEvent            = NULL;
 }
 
 CObjectTracker::~CObjectTracker()
@@ -145,8 +78,8 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
         {
             best->Update(pos, size);
 
-            if(UpdateEvent)
-                UpdateEvent(best, false);
+            if(m_pUpdateEvent)
+                m_pUpdateEvent(best, false);
         }
         else
         {
@@ -155,8 +88,8 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
 
             m_TrackedObjects.push_back(newobj);
 
-            if(NewTargEvent)
-                NewTargEvent(newobj);
+            if(m_pNewTargEvent)
+                m_pNewTargEvent(newobj);
         }
     }
 
@@ -175,8 +108,8 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
         double lastseen = GetCurrentTime() - Obj->LastSeen();
         if(lastseen > 1.0) // TODO: Make a var to control this
         {
-            if(LostTargEvent)
-                LostTargEvent(Obj);
+            if(m_pLostTargEvent)
+                m_pLostTargEvent(Obj);
 
             RemoveNextIteration = Obj; // Mark this to be removed next iterate (doing it now will cause a segfault)
             continue;
@@ -184,8 +117,8 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
         else if (lastseen > 0.05) // Simulate stuff if we havn't seen for 50ms
         {
             Obj->SimulateUpdate();
-            if(UpdateEvent)
-                UpdateEvent(Obj, true);
+            if(m_pUpdateEvent)
+                m_pUpdateEvent(Obj, true);
         }
     }
 
@@ -215,17 +148,17 @@ void CObjectTracker::SetEvent(EventType type, void* function)
     {
         case EVENT_NEWTARG:
         {
-            NewTargEvent = (NewTargetFn)(unsigned long)function;
+            m_pNewTargEvent = (NewTargetFn)(unsigned long)function;
             break;
         }
         case EVENT_UPDATE:
         {
-            UpdateEvent = (UpdateTargetFn)(unsigned long)function;
+            m_pUpdateEvent = (UpdateTargetFn)(unsigned long)function;
             break;
         }
         case EVENT_LOST:
         {
-            LostTargEvent = (LostTargetFn)(unsigned long)function;
+            m_pLostTargEvent = (LostTargetFn)(unsigned long)function;
             break;
         }
     }

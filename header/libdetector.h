@@ -63,6 +63,9 @@ namespace Detector
         float               m_flNewTargetThreshold;
         TrackedObjects      m_TrackedObjects;
         targetid            m_CurrentID;
+        NewTargetFn         m_pNewTargEvent;
+        UpdateTargetFn      m_pUpdateEvent;
+        LostTargetFn        m_pLostTargEvent;
     };
 } // End Namespace
 

@@ -35,17 +35,17 @@
 	<vector>
 	<list>
 
-1313687905 source:/home/c0bra/Projects/libdetector/source/detector.cpp
+1313690360 source:/home/c0bra/Projects/libdetector/source/detector.cpp
 	"string.h"
 	<iostream>
 	<exception>
 	<cmath>
 	"../header/libdetector.h"
 
-1313517301 /home/c0bra/Projects/libdetector/header/libdetector.h
+1313706495 /home/c0bra/Projects/libdetector/header/libdetector.h
 	"interface.h"
 
-1313459795 /home/c0bra/Projects/libdetector/header/interface.h
+1313690564 /home/c0bra/Projects/libdetector/header/interface.h
 	<stdio.h>
 	<stdlib.h>
 	<iostream>
@@ -55,4 +55,18 @@
 	<list>
 
 1313688075 source:/home/c0bra/Projects/libdetector/source/tracker.cpp
+
+1313690484 source:/home/c0bra/Projects/libdetector/source/util.cpp
+	"string.h"
+	<iostream>
+	<exception>
+	<cmath>
+	"../header/libdetector.h"
+
+1313706212 source:/home/c0bra/Projects/libdetector/source/object.cpp
+	"string.h"
+	<iostream>
+	<exception>
+	<cmath>
+	"../header/libdetector.h"
 
