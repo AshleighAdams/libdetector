@@ -201,7 +201,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
                         PMOTION_XY(movement, x, y) = PIXEL_MOTION;
                 }
 
-                float discriptor = GetDiscriptor(targ, movement);
+                float discriptor = GetDiscriptor(movement);
 
                 delete movement->motion;
                 delete movement;
