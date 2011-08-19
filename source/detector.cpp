@@ -124,9 +124,14 @@ motionhelper_t* GetBoundsFromMotion( motion_t* motion, int sizex, int sizey, int
 	motionhelper->MinX = x;
 	motionhelper->MaxY = y;
 	motionhelper->MinY = y;
+
+	// Size of the motion
 	motionhelper->size.width = sizex;
 	motionhelper->size.height = sizey;
+
+	// Start it.
 	DoNextScanLine( x, y, motionhelper );
+
 	return motionhelper;
 }
 
@@ -180,6 +185,27 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			targ->y = ( float )helper->MinY / ( float )h;
 			targ->width = ( float )( helper->MaxX - targ->x ) / ( float )w;
 			targ->height = ( float )( helper->MaxY - targ->y ) / ( float )h;
+
+            if( true && targ->height + targ->width < m_flMinTargSize )
+            // TODO: Fix this so it only turns on if object recognition is running
+            {
+                motion_t* movement = new motion_t;
+                movement->size.height = helper->MaxY - helper->MinY;
+                movement->size.width = helper->MaxX - helper->MinX;
+                movement->motion = new unsigned char[x * y * movement->size.width];
+
+                XY_LOOP_START(helper->MinX, helper->MinY,
+                              helper->MaxX, helper->MaxY)
+                {
+                    if(PMOTION_XY(helper, x, y) == PIXEL_SCANNEDMOTION)
+                        PMOTION_XY(movement, x, y) = PIXEL_MOTION;
+                }
+
+                float discriptor = GetDiscriptor(targ, movement);
+
+                delete movement->motion;
+                delete movement;
+            }
 
 			delete helper;
 

@@ -96,3 +96,12 @@ bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
 {
 	return a.width == b.width && a.height == b.height;
 }
+
+// Gets the first none-motion pixel from the
+float GetProng(target_t* Targ, int Prong, int MaxProngs)
+{
+}
+
+float Detector::GetDiscriptor(target_t* Targ, motion_t* Motion)
+{
+}

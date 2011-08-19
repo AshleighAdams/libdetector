@@ -20,6 +20,8 @@ namespace Detector
     typedef void(*LostTargetFn)(CTrackedObject* Obj);
     const EventType EVENT_LOST = 2;
 
+    float GetDiscriptor(target_t* Targ, motion_t* Motion);
+
     class CDetector : public IDetector
     {
         friend motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );

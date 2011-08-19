@@ -24,6 +24,11 @@
 #define PMOTION_XY(_struct_, x, y) _struct_->motion[(x) + (y) * _struct_->size.width]
 
 #define XY_LOOP(_w_,_h_) for(int y = 0; y < _h_; y++) for(int x = 0; x < _w_; x++)
+
+#define XY_LOOP_START(_x_,_y_,_endx_,_endy_) \
+    for(int y = _y_; y < _endy_; y++)\
+    for(int x = _x_; x < _endx_; x++)
+
 #define PRINT(_X_) std::cout << _X_ << '\n'
 
 unsigned char DiffrenceBetween( unsigned char a, unsigned char b );
@@ -135,6 +140,7 @@ namespace Detector
         float y;
         float width;
         float height;
+        unsigned char motion[];
     };
 
     class IDetector : public CDetectorBaseClass
