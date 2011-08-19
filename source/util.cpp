@@ -4,6 +4,8 @@
 #include "string.h"
 #include <iostream>
 #include <exception>
+
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 #define DETECTOR_INTERNAL
@@ -97,11 +99,41 @@ bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
 	return a.width == b.width && a.height == b.height;
 }
 
-// Gets the first none-motion pixel from the
-float GetProng(target_t* Targ, int Prong, int MaxProngs)
+float GetRingDensity(motion_t* Motion, float SizePercent)
 {
+    int center_x, center_y;
+    center_x = Motion->size.width * 0.5f;
+    center_y = Motion->size.height * 0.5f;
+
+    int motioncount = 0;
+    int total;
+
+    // TODO: This inc var needs improving; good enough for now.
+    int x,y;
+    const float inc = (1.0f - SizePercent) / (M_PI * 2);
+    total = (M_PI * 2.0f) / inc; // Total number of itterations
+
+    for(float i = 0.0f; i < M_PI * 2.0f; i += inc)
+    {
+        x = ((1.0f + cos(i)) * 0.5f) * ((float)center_x * SizePercent);
+        y = ((1.0f + sin(i)) * 0.5f) * ((float)center_y * SizePercent);
+        if(PMOTION_XY(Motion, x, y) == PIXEL_MOTION)
+            motioncount++;
+    }
+    return motioncount / total;
 }
 
-float Detector::GetDiscriptor(target_t* Targ, motion_t* Motion)
+float Detector::GetDiscriptor(target_t* Targ, motion_t* Motion) // Might want to use CDetectorImage but shouldn't need to
 {
+
+
+
+
+    return 0.0f;
 }
+
+
+
+
+
+
