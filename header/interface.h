@@ -73,7 +73,7 @@ namespace Detector
     class CDetectorBaseClass
     {
     public:
-        virtual ~CDetectorBaseClass() {}; // GARH, this is so out real destructor is called!
+        virtual ~CDetectorBaseClass() {}; // GARH, this is so our real destructor is called!
         void Refrence( void )
         {
             m_iRefrenceCount++;
@@ -208,12 +208,19 @@ namespace Detector
         virtual TrackedObjects* GetTrackedObjects() = 0;
     };
 
+    class CDiscriptorValue : public CDetectorBaseClass
+    {
+    public:
+        int g_Count;
+        float* g_Values;
+    };
+
     class IDiscriptor : public CDetectorBaseClass
     {
     public:
         // Returns an array of floats to discribe an object
-        virtual float* GetDiscriptor(motion_t* Motion, int &Count) = 0;
-        virtual char* GetName(float* Discriptor, int Count) = 0;
+        virtual CDiscriptorValue* GetDiscriptor(motion_t* Motion) = 0;
+        virtual char* GetName(CDiscriptorValue* Discriptor, int Count) = 0;
     };
 
 }

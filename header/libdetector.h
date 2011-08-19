@@ -38,6 +38,8 @@ namespace Detector
         void SetDiffrenceThreshold( short sAmmount );
         // Any targets smaller than this will be removed
         void SetMinTargSize( float flAmmount );
+        // Sets the discriptor of an object to use (these normally use extra CPU!)
+        void SetDiscriptor(IDiscriptor* Discriptor);
     protected:
     private:
         imagesize_t         m_sSize;
@@ -46,6 +48,7 @@ namespace Detector
         target_t*           m_pTargets[MAX_TARGETS];
         int                 m_iTargets;
         float               m_flMinTargSize;
+        IDiscriptor*        m_pDiscriptor;
     };
 
     motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );
@@ -68,6 +71,15 @@ namespace Detector
         NewTargetFn         m_pNewTargEvent;
         UpdateTargetFn      m_pUpdateEvent;
         LostTargetFn        m_pLostTargEvent;
+    };
+
+    // Really simple, 3 density rings
+    class CBaseDiscriptor : public IDiscriptor
+    {
+    public:
+        CDiscriptorValue* GetDiscriptor(motion_t* Motion);
+        char* GetName(CDiscriptorValue* Discriptor, int Count);
+    private:
     };
 } // End Namespace
 

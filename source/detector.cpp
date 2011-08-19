@@ -138,17 +138,38 @@ motionhelper_t* GetBoundsFromMotion( motion_t* motion, int sizex, int sizey, int
 CDetector::CDetector( imagesize_t Size )
 {
 	m_sSize = Size;
-	m_pLastImage = 0;
+	m_pLastImage = NULL;
 	m_sDiffrenceThreshold = 10;
 	m_iTargets = 0;
 	m_flMinTargSize = 0.01f;
 	for( int i = 0; i < MAX_TARGETS; i++ )
-		m_pTargets[i] = 0;
+		m_pTargets[i] = NULL;
+    m_pDiscriptor = NULL;
 }
 
 CDetector::~CDetector()
 {
-	delete m_pLastImage;
+	m_pLastImage->UnRefrence();
+	m_pDiscriptor->UnRefrence();
+
+    // Make sure all the targets are deleted
+	for( int i = 0; i < MAX_TARGETS; i++ )
+	{
+		if( m_pTargets[i] )
+			delete m_pTargets[i];
+		m_pTargets[i] = 0;
+	}
+}
+
+void CDetector::SetDiscriptor(IDiscriptor* Discriptor)
+{
+    if(m_pDiscriptor)
+        m_pDiscriptor->UnRefrence();
+
+    m_pDiscriptor = Discriptor;
+
+    if(m_pDiscriptor) // Déjà vu (almost)
+        m_pDiscriptor->Refrence();
 }
 
 bool CDetector::PushImage( CDetectorImage* pImage )
@@ -162,7 +183,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 		return false;
 	}
 
-	// Clear the target cache
+	// Clear the target cache (not reallocate memory, that's slow)
 	for( int i = 0; i < MAX_TARGETS; i++ )
 	{
 		if( m_pTargets[i] )
@@ -186,7 +207,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			targ->width = ( float )( helper->MaxX - targ->x ) / ( float )w;
 			targ->height = ( float )( helper->MaxY - targ->y ) / ( float )h;
 
-            if( true && targ->height + targ->width < m_flMinTargSize )
+            if( m_pDiscriptor && targ->height + targ->width < m_flMinTargSize )
             // TODO: Fix this so it only turns on if object recognition is running
             {
                 motion_t* movement = new motion_t;
@@ -201,7 +222,9 @@ bool CDetector::PushImage( CDetectorImage* pImage )
                         PMOTION_XY(movement, x, y) = PIXEL_MOTION;
                 }
 
-                float discriptor = GetDiscriptor(movement);
+
+                CDiscriptorValue* discriptor = m_pDiscriptor->GetDiscriptor(movement);
+                discriptor->UnRefrence();
 
                 delete movement->motion;
                 delete movement;
@@ -217,7 +240,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 
 			m_pTargets[count++] = targ;
 			if( count == MAX_TARGETS ) // Max targets have been reached, just escape the loop
-				goto EndLoop;
+				goto EndLoop;   // This is here because we are nested in 2 loops
 		}
 	}
 
