@@ -144,13 +144,13 @@ CDetector::CDetector( imagesize_t Size )
 	m_flMinTargSize = 0.01f;
 	for( int i = 0; i < MAX_TARGETS; i++ )
 		m_pTargets[i] = NULL;
-    m_pDiscriptor = NULL;
+    m_pDescriptor = NULL;
 }
 
 CDetector::~CDetector()
 {
 	m_pLastImage->UnRefrence();
-	m_pDiscriptor->UnRefrence();
+	m_pDescriptor->UnRefrence();
 
     // Make sure all the targets are deleted
 	for( int i = 0; i < MAX_TARGETS; i++ )
@@ -161,15 +161,15 @@ CDetector::~CDetector()
 	}
 }
 
-void CDetector::SetDiscriptor(IDiscriptor* Discriptor)
+void CDetector::SetDescriptor(IDescriptor* Descriptor)
 {
-    if(m_pDiscriptor)
-        m_pDiscriptor->UnRefrence();
+    if(m_pDescriptor)
+        m_pDescriptor->UnRefrence();
 
-    m_pDiscriptor = Discriptor;
+    m_pDescriptor = Descriptor;
 
-    if(m_pDiscriptor) // Déjà vu (almost)
-        m_pDiscriptor->Refrence();
+    if(m_pDescriptor) // Déjà vu (almost)
+        m_pDescriptor->Refrence();
 }
 
 bool CDetector::PushImage( CDetectorImage* pImage )
@@ -207,7 +207,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			targ->width = ( float )( helper->MaxX - targ->x ) / ( float )w;
 			targ->height = ( float )( helper->MaxY - targ->y ) / ( float )h;
 
-            if( m_pDiscriptor && targ->height + targ->width < m_flMinTargSize )
+            if( m_pDescriptor && targ->height + targ->width < m_flMinTargSize )
             // TODO: Fix this so it only turns on if object recognition is running
             {
                 motion_t* movement = new motion_t;
@@ -223,8 +223,8 @@ bool CDetector::PushImage( CDetectorImage* pImage )
                 }
 
 
-                CDiscriptorValue* discriptor = m_pDiscriptor->GetDiscriptor(movement);
-                discriptor->UnRefrence();
+                CDescriptorValue* Descriptor = m_pDescriptor->GetDescriptor(movement);
+                Descriptor->UnRefrence();
 
                 delete movement->motion;
                 delete movement;

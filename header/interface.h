@@ -208,19 +208,19 @@ namespace Detector
         virtual TrackedObjects* GetTrackedObjects() = 0;
     };
 
-    class CDiscriptorValue : public CDetectorBaseClass
+    class CDescriptorValue : public CDetectorBaseClass
     {
     public:
         int g_Count;
         float* g_Values;
     };
 
-    class IDiscriptor : public CDetectorBaseClass
+    class IDescriptor : public CDetectorBaseClass
     {
     public:
         // Returns an array of floats to discribe an object
-        virtual CDiscriptorValue* GetDiscriptor(motion_t* Motion) = 0;
-        virtual char* GetName(CDiscriptorValue* Discriptor, int Count) = 0;
+        virtual CDescriptorValue* GetDescriptor(motion_t* Motion) = 0;
+        virtual char* GetName(CDescriptorValue* Descriptor, int Count) = 0;
     };
 
 }

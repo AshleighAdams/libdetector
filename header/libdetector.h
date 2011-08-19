@@ -20,7 +20,7 @@ namespace Detector
     typedef void(*LostTargetFn)(CTrackedObject* Obj);
     const EventType EVENT_LOST = 2;
 
-    float GetDiscriptor(motion_t* Motion);
+    float GetDescriptor(motion_t* Motion);
 
     class CDetector : public IDetector
     {
@@ -38,8 +38,8 @@ namespace Detector
         void SetDiffrenceThreshold( short sAmmount );
         // Any targets smaller than this will be removed
         void SetMinTargSize( float flAmmount );
-        // Sets the discriptor of an object to use (these normally use extra CPU!)
-        void SetDiscriptor(IDiscriptor* Discriptor);
+        // Sets the Descriptor of an object to use (these normally use extra CPU!)
+        void SetDescriptor(IDescriptor* Descriptor);
     protected:
     private:
         imagesize_t         m_sSize;
@@ -48,7 +48,7 @@ namespace Detector
         target_t*           m_pTargets[MAX_TARGETS];
         int                 m_iTargets;
         float               m_flMinTargSize;
-        IDiscriptor*        m_pDiscriptor;
+        IDescriptor*        m_pDescriptor;
     };
 
     motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );
@@ -74,11 +74,11 @@ namespace Detector
     };
 
     // Really simple, 3 density rings
-    class CBaseDiscriptor : public IDiscriptor
+    class CBaseDescriptor : public IDescriptor
     {
     public:
-        CDiscriptorValue* GetDiscriptor(motion_t* Motion);
-        char* GetName(CDiscriptorValue* Discriptor, int Count);
+        CDescriptorValue* GetDescriptor(motion_t* Motion);
+        char* GetName(CDescriptorValue* Descriptor, int Count);
     private:
     };
 } // End Namespace

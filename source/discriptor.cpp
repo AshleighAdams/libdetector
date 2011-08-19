@@ -15,6 +15,8 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
     center_x = Motion->size.width * 0.5f;
     center_y = Motion->size.height * 0.5f;
 
+    int size = (center_x + center_y) / 2;
+
     float flScaleX = (float)center_x * flSizePercent;
     float flScaleY = (float)center_y * flSizePercent;
 
@@ -22,26 +24,29 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
     int x,y,inc,total,motioncount;
 
     motioncount     = 0;
-    inc             = (1.f - flSizePercent) / (M_PI * 2.f) + 1;
-    total           = (M_PI * 2.f) / inc; // Total number of itterations
+    const int pixel_increase_per_pixelout = 8;
+    inc             = 360 / (pixel_increase_per_pixelout * size); // This many iterations (size)
+    total           = 360 / inc; // Find out how many
 
-    for(float i = 0.f; i < M_PI * 2.f; i += inc)
+    int rads;
+    for(int i = 0; i < 360; i+=inc)
     {
-        x = (cos(i) * flScaleX) + center_x;
-        y = (sin(i) * flScaleY) + center_y;
+        rads = (M_PI * 2) / i;
+        x = (cos(rads) * flScaleX) + center_x;
+        y = (sin(rads) * flScaleY) + center_y;
 
         //PRINT(x << " :: " << y);
 
         if(PMOTION_XY(Motion, x, y) == PIXEL_SCANNEDMOTION)
             motioncount++;
     }
-    PRINT(motioncount);
+    PRINT(motioncount << "::" << total);
     return (float)motioncount / (float)total;
 }
 
-CDiscriptorValue* CBaseDiscriptor::GetDiscriptor(motion_t* Motion) // Might want to use CDetectorImage but shouldn't need to
+CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion) // Might want to use CDetectorImage but shouldn't need to
 {
-    CDiscriptorValue* ret = new CDiscriptorValue;
+    CDescriptorValue* ret = new CDescriptorValue;
     ret->g_Count = 3;
     ret->g_Values = new float[3];
 
@@ -52,7 +57,7 @@ CDiscriptorValue* CBaseDiscriptor::GetDiscriptor(motion_t* Motion) // Might want
     return ret;
 }
 
-char* CBaseDiscriptor::GetName(CDiscriptorValue* Discriptor, int Count)
+char* CBaseDescriptor::GetName(CDescriptorValue* Descriptor, int Count)
 {
     return (char*)"Not Implented!";
 }
