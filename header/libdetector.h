@@ -45,7 +45,7 @@ namespace Detector
     protected:
     private:
         imagesize_t         m_sSize;
-        CDetectorImage*     m_pRefrenceImage;
+        CDetectorImage*     m_pRefrenceImage; // This is the image used to compare to
         unsigned char       m_sDiffrenceThreshold;
         target_t*           m_pTargets[MAX_TARGETS];
         int                 m_iTargets;
@@ -82,6 +82,7 @@ namespace Detector
     public:
         CDescriptorValue* GetDescriptor(motion_t* Motion);
         char* GetName(CDescriptorValue* Descriptor, int Count);
+        bool LoadDescriptor(char* File); // TODO: Implent this
     private:
     };
 } // End Namespace

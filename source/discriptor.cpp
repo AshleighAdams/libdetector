@@ -28,8 +28,6 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
     inc             = 360 / (pixel_increase_per_pixelout * size); // This many iterations (size)
     total           = 360 / inc; // Find out how many
 
-    PRINT(inc);
-
     int rads;
     for(int i = 0; i < 360; i+=inc)
     {
@@ -37,15 +35,13 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
         x = (cos(rads) * flScaleX) + center_x;
         y = (sin(rads) * flScaleY) + center_y;
 
-        //PRINT(x << " :: " << y);
-
         if(PMOTION_XY(Motion, x, y) == PIXEL_SCANNEDMOTION)
             motioncount++;
     }
     return (float)motioncount / (float)total;
 }
 
-CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion) // Might want to use CDetectorImage but shouldn't need to
+CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion)
 {
     CDescriptorValue* ret = new CDescriptorValue;
     ret->g_Count = 3;
@@ -63,5 +59,10 @@ CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion) // Might want
 char* CBaseDescriptor::GetName(CDescriptorValue* Descriptor, int Count)
 {
     return (char*)"Not Implented!";
+}
+
+bool CBaseDescriptor::LoadDescriptor(char* File)
+{
+    return false;
 }
 

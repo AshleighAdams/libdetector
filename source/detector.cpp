@@ -256,7 +256,7 @@ EndLoop:
 	delete [] motion->motion;
 	delete motion;
 
-	return false;
+	return true;
 }
 
 void CDetector::SetMotionBlur(float flAmmount)
