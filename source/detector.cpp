@@ -139,9 +139,9 @@ CDetector::CDetector( imagesize_t Size )
 {
 	m_sSize = Size;
 	m_pRefrenceImage = NULL;
-	m_sDiffrenceThreshold = 10;
+	m_sDiffrenceThreshold = 50;
 	m_iTargets = 0;
-	m_flMinTargSize = .01f;
+	m_flMinTargSize = .05f;
 	for( int i = 0; i < MAX_TARGETS; i++ )
 		m_pTargets[i] = NULL;
     m_pDescriptor = NULL;
@@ -205,11 +205,10 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			target_t* targ = new target_t;
 			targ->x = ( float )helper->MinX / ( float )w;
 			targ->y = ( float )helper->MinY / ( float )h;
-			targ->width = ( float )( helper->MaxX - targ->x ) / ( float )w;
-			targ->height = ( float )( helper->MaxY - targ->y ) / ( float )h;
+			targ->width = ( float )( helper->MaxX - helper->MinX ) / ( float )w;
+			targ->height = ( float )( helper->MaxY - helper->MinY ) / ( float )h;
 
             if( m_pDescriptor && targ->height + targ->width < m_flMinTargSize )
-            // TODO: Fix this so it only turns on if object recognition is running
             {
                 motion_t* movement = new motion_t;
                 movement->size.height = helper->MaxY - helper->MinY;
@@ -224,10 +223,10 @@ bool CDetector::PushImage( CDetectorImage* pImage )
                 }
 
 
-                CDescriptorValue* Descriptor = m_pDescriptor->GetDescriptor(movement);
-                Descriptor->UnRefrence();
+                //CDescriptorValue* Descriptor = m_pDescriptor->GetDescriptor(movement);
+                //Descriptor->UnRefrence();
 
-                delete movement->motion;
+                delete [] movement->motion;
                 delete movement;
             }
 
@@ -252,6 +251,7 @@ EndLoop:
 	MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount);
 	//m_pRefrenceImage->UnRefrence();
 	//m_pRefrenceImage = pImage->Exclusive();
+	pImage->UnRefrence();
 
 	delete [] motion->motion;
 	delete motion;

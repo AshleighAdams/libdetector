@@ -19,7 +19,7 @@ using namespace Detector;
     Thanks to Carl Staelin for this snippet
     http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
 */
-//#define CLOCKS_PER_SEC 0
+#define CLOCKS_PER_SEC 0
 LARGE_INTEGER getFILETIMEoffset()
 {
 	SYSTEMTIME s;
@@ -90,7 +90,7 @@ double Detector::GetCurrentTime()
 	struct timespec now;
 	clock_gettime( CLOCK_MONOTONIC, &now );
 
-    // return ( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec; // Why was I deviding by 0?
+    return ( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec; // Why was I deviding by 0?
 	return ( double )( now.tv_nsec ) / 1000.0 + ( double )now.tv_sec;
 }
 
@@ -117,6 +117,71 @@ void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float f
 }
 
 
+
+pixel_t* _pix;
+void inline SetPixelRed(CDetectorImage* Img, int x, int y)
+{
+    _pix = Img->Pixel(x,y);
+    _pix->r = 255;
+    _pix->g = 0;
+    _pix->b = 0;
+}
+void inline SetPixelGreen(CDetectorImage* Img, int x, int y)
+{
+    _pix = Img->Pixel(x,y);
+    _pix->r = 0;
+    _pix->g = 255;
+    _pix->b = 0;
+}
+
+void Detector::DrawTarget(CDetectorImage* Img, target_t* Targ)
+{
+    imagesize_t size = Img->GetSize();
+    int startx  = Targ->x * size.width;
+    int starty  = Targ->y * size.height;
+
+    int endx    = startx + Targ->width * size.width;
+    int endy    = starty + Targ->height * size.height;
+
+    for (int x = startx + 1; x < endx; x++)
+    {
+        SetPixelRed(Img, x, starty);
+        SetPixelRed(Img, x, std::min(size.height -1, endy));
+    }
+    for (int y = starty; y < endy + 1; y++)
+    {
+        SetPixelRed(Img, startx, y);
+        SetPixelRed(Img, std::min(size.width - 1, endx), y);
+    }
+    //        SetPixel(ref bmp_data, x, y, col);
+}
+
+void Detector::DrawTarget(CDetectorImage* Img, CTrackedObject* Obj)
+{
+    imagesize_t size = Img->GetSize();
+    int startx  = Obj->Position().x * size.width;
+    int starty  = Obj->Position().y * size.height;
+
+    int endx    = startx + Obj->Size().w * size.width;
+    int endy    = starty + Obj->Size().h * size.height;
+
+    startx  = std::max( std::min( startx, size.width ), 0 );
+    endx    = std::max( std::min( endx, size.width ), 0 );
+
+    starty  = std::max( std::min( starty, size.height ), 0 );
+    endy    = std::max( std::min( endy, size.height ), 0 );
+
+    for (int x = startx + 1; x < endx; x++)
+    {
+        SetPixelGreen(Img, x, starty);
+        SetPixelGreen(Img, x, std::min(size.height -1, endy));
+    }
+    for (int y = starty; y < endy + 1; y++)
+    {
+        SetPixelGreen(Img, startx, y);
+        SetPixelGreen(Img, std::min(size.width - 1, endx), y);
+    }
+}
 
 
 

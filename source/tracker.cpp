@@ -37,7 +37,8 @@ float Detector::Distance(position_t& a, position_t& b)
 CObjectTracker::CObjectTracker()
 {
     m_flLastSeenLifeTime        = 0.5f;
-    m_flNewTargetThreshold      = 0.9f;
+    m_flNewTargetThreshold      = 0.7f;
+    m_flNewTargetTimeThreshold  = 0.25f; // We have to be waiting this ammount of time before we can create a new target
     m_pNewTargEvent             = NULL;
     m_pUpdateEvent              = NULL;
     m_pLostTargEvent            = NULL;
@@ -50,6 +51,7 @@ CObjectTracker::~CObjectTracker()
 void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
 {
     if(Count > MAX_TARGETS -1) return; // Just an assertion
+    bool NewTargets = false;
     for(int i = 0; i < Count; i++)
     {
         target_t* Target = Targets[i];
@@ -83,15 +85,32 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
         }
         else
         {
-            CTrackedObject* newobj = new CTrackedObject(m_CurrentID++);
-            newobj->Update(pos, size);
+            if(m_flNewTargetTime != 0.f && GetCurrentTime() - m_flNewTargetTime > m_flNewTargetTimeThreshold)
+            {
+                CTrackedObject* newobj = new CTrackedObject(m_CurrentID++);
+                newobj->Update(pos, size);
 
-            m_TrackedObjects.push_back(newobj);
+                m_TrackedObjects.push_back(newobj);
 
-            if(m_pNewTargEvent)
-                m_pNewTargEvent(newobj);
+                if(m_pNewTargEvent)
+                    m_pNewTargEvent(newobj);
+
+                m_flNewTargetTime = 0.f;
+            }
+            else
+                NewTargets = true;
+
         }
     }
+
+    // This is so a target must be wanted to be created for m_flNewTargetTimeThreshold seconds
+    if(NewTargets)
+    {
+        if(m_flNewTargetTime == 0.f)
+            m_flNewTargetTime = GetCurrentTime();
+    }
+    else
+        m_flNewTargetTime = 0.f;
 
     CTrackedObject* RemoveNextIteration = NULL;
 

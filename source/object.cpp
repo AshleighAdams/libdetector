@@ -22,6 +22,21 @@ double CTrackedObject::LastSeen()
 	return m_dblLastSeen;
 }
 
+velocity_t CTrackedObject::Velocity()
+{
+    return m_sVelocity;
+}
+
+Detector::ssize_t CTrackedObject::Size()
+{
+    return m_sSize;
+}
+
+position_t CTrackedObject::Position()
+{
+    return m_sPosition;
+}
+
 void CTrackedObject::Update(position_t& pos, ssize_t& size)
 {
     float velx = pos.x - m_sPosition.x;

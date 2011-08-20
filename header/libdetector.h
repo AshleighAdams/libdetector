@@ -69,6 +69,8 @@ namespace Detector
     private:
         float               m_flLastSeenLifeTime;
         float               m_flNewTargetThreshold;
+        float               m_flNewTargetTimeThreshold;
+        float               m_flNewTargetTime;
         TrackedObjects      m_TrackedObjects;
         targetid            m_CurrentID;
         NewTargetFn         m_pNewTargEvent;
@@ -85,6 +87,10 @@ namespace Detector
         bool LoadDescriptor(char* File); // TODO: Implent this
     private:
     };
+
+    // Util funcs
+    void DrawTarget(CDetectorImage* Img, CTrackedObject* Obj);
+    void DrawTarget(CDetectorImage* Img, target_t* Targ);
 } // End Namespace
 
 #endif // LIB_DET_H

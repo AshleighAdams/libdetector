@@ -187,6 +187,7 @@ namespace Detector
         targetid    ID();
         position_t  Position();
         velocity_t  Velocity();
+        ssize_t     Size();
         double      LastSeen();
         float       GetScore(target_t* Target);
         void        Update(position_t& pos, ssize_t& size);
