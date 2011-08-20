@@ -52,6 +52,7 @@ namespace Detector
         float               m_flMinTargSize;
         IDescriptor*        m_pDescriptor;
         float               m_flBlurAmmount;
+        float               m_flBlurMaxChange;
     };
 
     motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );

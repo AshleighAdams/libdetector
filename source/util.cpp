@@ -11,7 +11,7 @@
 #define DETECTOR_INTERNAL
 #include "../header/libdetector.h"
 using namespace Detector;
-
+using namespace std;
 
 
 #ifdef WINDOWS // We need a standard for this...
@@ -99,7 +99,7 @@ bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
 	return a.width == b.width && a.height == b.height;
 }
 
-void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount)
+void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount, float flMaxChange)
 {
     if( !imagesize_tEqual(Refrence->GetSize(), New->GetSize()) )
         return;
@@ -110,9 +110,9 @@ void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float f
         pixa = Refrence->Pixel(x,y);
         pixb = New->Pixel(x,y);
 
-        pixa->r -= (float)(pixa->r - pixb->r) * flBlurAmmount;
-        pixa->g -= (float)(pixa->g - pixb->g) * flBlurAmmount;
-        pixa->b -= (float)(pixa->b - pixb->b) * flBlurAmmount;
+        pixa->r -= min(flMaxChange, (float)(pixa->r - pixb->r) * flBlurAmmount);
+        pixa->g -= min(flMaxChange, (float)(pixa->g - pixb->g) * flBlurAmmount);
+        pixa->b -= min(flMaxChange, (float)(pixa->b - pixb->b) * flBlurAmmount);
     }
 }
 

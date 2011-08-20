@@ -95,7 +95,7 @@ void CObjectTracker::PushTargets(target_t* Targets[MAX_TARGETS], int Count)
                 if(m_pNewTargEvent)
                     m_pNewTargEvent(newobj);
 
-                m_flNewTargetTime = 0.f;
+                m_flNewTargetTime = GetCurrentTime();
             }
             else
                 NewTargets = true;

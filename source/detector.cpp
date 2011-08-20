@@ -146,6 +146,7 @@ CDetector::CDetector( imagesize_t Size )
 		m_pTargets[i] = NULL;
     m_pDescriptor = NULL;
     m_flBlurAmmount = .1f;
+    m_flBlurMaxChange = 1.f;
 }
 
 CDetector::~CDetector()
@@ -248,7 +249,7 @@ EndLoop:
 
 	m_iTargets = count;
 
-	MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount);
+	MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
 	//m_pRefrenceImage->UnRefrence();
 	//m_pRefrenceImage = pImage->Exclusive();
 	pImage->UnRefrence();
