@@ -138,18 +138,19 @@ motionhelper_t* GetBoundsFromMotion( motion_t* motion, int sizex, int sizey, int
 CDetector::CDetector( imagesize_t Size )
 {
 	m_sSize = Size;
-	m_pLastImage = NULL;
+	m_pRefrenceImage = NULL;
 	m_sDiffrenceThreshold = 10;
 	m_iTargets = 0;
-	m_flMinTargSize = 0.01f;
+	m_flMinTargSize = .01f;
 	for( int i = 0; i < MAX_TARGETS; i++ )
 		m_pTargets[i] = NULL;
     m_pDescriptor = NULL;
+    m_flBlurAmmount = .1f;
 }
 
 CDetector::~CDetector()
 {
-	m_pLastImage->UnRefrence();
+	m_pRefrenceImage->UnRefrence();
 	m_pDescriptor->UnRefrence();
 
     // Make sure all the targets are deleted
@@ -177,9 +178,9 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 	if( !imagesize_tEqual( pImage->GetSize(), m_sSize ) )
 		return false;
 	pImage->Refrence();
-	if( !m_pLastImage )
+	if( !m_pRefrenceImage )
 	{
-		m_pLastImage = pImage->Exclusive();
+		m_pRefrenceImage = pImage->Exclusive();
 		return false;
 	}
 
@@ -190,7 +191,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			delete m_pTargets[i];
 		m_pTargets[i] = 0;
 	}
-	motion_t* motion = AbsoluteDiffrence( this, pImage, m_pLastImage );
+	motion_t* motion = AbsoluteDiffrence( this, pImage, m_pRefrenceImage );
 	int w, h;
 	w = motion->size.width;
 	h = motion->size.height;
@@ -247,13 +248,20 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 EndLoop:
 
 	m_iTargets = count;
-	m_pLastImage->UnRefrence();
-	m_pLastImage = pImage->Exclusive();
+
+	MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount);
+	//m_pRefrenceImage->UnRefrence();
+	//m_pRefrenceImage = pImage->Exclusive();
 
 	delete [] motion->motion;
 	delete motion;
 
 	return false;
+}
+
+void CDetector::SetMotionBlur(float flAmmount)
+{
+    m_flBlurAmmount = flAmmount;
 }
 
 int CDetector::GetTargets( target_t* Targets[MAX_TARGETS] )

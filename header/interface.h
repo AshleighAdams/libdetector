@@ -165,6 +165,7 @@ namespace Detector
     };
 
     float Distance(position_t &a, position_t &b);
+    void MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount);
 
     struct ssize_t
     {

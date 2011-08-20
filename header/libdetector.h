@@ -40,15 +40,18 @@ namespace Detector
         void SetMinTargSize( float flAmmount );
         // Sets the Descriptor of an object to use (these normally use extra CPU!)
         void SetDescriptor(IDescriptor* Descriptor);
+        // Set motion blur ammount
+        void SetMotionBlur(float flAmmount);
     protected:
     private:
         imagesize_t         m_sSize;
-        CDetectorImage*     m_pLastImage;
+        CDetectorImage*     m_pRefrenceImage;
         unsigned char       m_sDiffrenceThreshold;
         target_t*           m_pTargets[MAX_TARGETS];
         int                 m_iTargets;
         float               m_flMinTargSize;
         IDescriptor*        m_pDescriptor;
+        float               m_flBlurAmmount;
     };
 
     motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );

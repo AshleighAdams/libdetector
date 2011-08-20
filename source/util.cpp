@@ -99,6 +99,26 @@ bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
 	return a.width == b.width && a.height == b.height;
 }
 
+void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount)
+{
+    if( !imagesize_tEqual(Refrence->GetSize(), New->GetSize()) )
+        return;
+    imagesize_t size = Refrence->GetSize();
+    pixel_t *pixa, *pixb;
+    XY_LOOP(size.width, size.height)
+    {
+        pixa = Refrence->Pixel(x,y);
+        pixb = New->Pixel(x,y);
+
+        pixa->r -= (float)(pixa->r - pixb->r) * flBlurAmmount;
+        pixa->g -= (float)(pixa->g - pixb->g) * flBlurAmmount;
+        pixa->b -= (float)(pixa->b - pixb->b) * flBlurAmmount;
+    }
+}
+
+
+
+
 
 
 

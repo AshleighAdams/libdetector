@@ -28,10 +28,12 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
     inc             = 360 / (pixel_increase_per_pixelout * size); // This many iterations (size)
     total           = 360 / inc; // Find out how many
 
+    PRINT(inc);
+
     int rads;
     for(int i = 0; i < 360; i+=inc)
     {
-        rads = (M_PI * 2) / i;
+        rads = M_PI / 180.f * (float)i;
         x = (cos(rads) * flScaleX) + center_x;
         y = (sin(rads) * flScaleY) + center_y;
 
@@ -40,7 +42,6 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
         if(PMOTION_XY(Motion, x, y) == PIXEL_SCANNEDMOTION)
             motioncount++;
     }
-    PRINT(motioncount << "::" << total);
     return (float)motioncount / (float)total;
 }
 
@@ -53,6 +54,8 @@ CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion) // Might want
     ret->g_Values[0] = GetRingDensity(Motion, 0.25f);
     ret->g_Values[1] = GetRingDensity(Motion, 0.5f);
     ret->g_Values[2] = GetRingDensity(Motion, 0.75f);
+
+    PRINT(ret->g_Values[0] << " :: " << ret->g_Values[1] << " :: " << ret->g_Values[2] << "\n");
 
     return ret;
 }
