@@ -110,9 +110,9 @@ void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float f
         pixa = Refrence->Pixel(x,y);
         pixb = New->Pixel(x,y);
 
-        pixa->r -= min(flMaxChange, (float)(pixa->r - pixb->r) * flBlurAmmount);
-        pixa->g -= min(flMaxChange, (float)(pixa->g - pixb->g) * flBlurAmmount);
-        pixa->b -= min(flMaxChange, (float)(pixa->b - pixb->b) * flBlurAmmount);
+        pixa->r -= max(-flMaxChange, min(flMaxChange, (float)(pixa->r - pixb->r) * flBlurAmmount));
+        pixa->g -= max(-flMaxChange, min(flMaxChange, (float)(pixa->g - pixb->g) * flBlurAmmount));
+        pixa->b -= max(-flMaxChange, min(flMaxChange, (float)(pixa->b - pixb->b) * flBlurAmmount));
     }
 }
 
