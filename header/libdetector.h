@@ -42,10 +42,12 @@ namespace Detector
         void SetDescriptor(IDescriptor* Descriptor);
         // Set motion blur ammount
         void SetMotionBlur(float flAmmount);
+        unsigned int GetFalsePosCount();
     protected:
-    private:
+    public:
         imagesize_t         m_sSize;
-        CDetectorImage*     m_pRefrenceImage; // This is the image used to compare to
+        CDetectorImage*     m_pRefrenceImage;       // This is the image used to compare to
+        motion_t*           m_pMotionImage;         // Usefull for testing
         unsigned char       m_sDiffrenceThreshold;
         target_t*           m_pTargets[MAX_TARGETS];
         int                 m_iTargets;
@@ -53,6 +55,11 @@ namespace Detector
         IDescriptor*        m_pDescriptor;
         float               m_flBlurAmmount;
         float               m_flBlurMaxChange;
+        unsigned int        m_iFalsePos;
+        bool                m_bCleverBackground; // Background that doesn't update unless there is noise
+        int                 m_BlurUpdateRate;
+        int                 m_BlurUpdateRateFrame;
+        float               m_flTotalMotion;
     };
 
     motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );

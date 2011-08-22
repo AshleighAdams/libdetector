@@ -7,6 +7,10 @@
 #include "../header/libdetector.h"
 using namespace Detector;
 
+CDescriptorValue::~CDescriptorValue()
+{
+    delete [] g_Values;
+}
 
 // Gets the density of a ring
 float GetRingDensity(motion_t* Motion, float flSizePercent)
@@ -26,6 +30,7 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
     motioncount     = 0;
     const int pixel_increase_per_pixelout = 8;
     inc             = 360 / (pixel_increase_per_pixelout * size); // This many iterations (size)
+    if(inc < 1) inc = 1;
     total           = 360 / inc; // Find out how many
 
     int rads;

@@ -116,7 +116,37 @@ void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float f
     }
 }
 
+// This blur is so the "blobs" join together much better
+void Detector::BlurMotion(motion_t* motion)
+{
+    unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
 
+    XY_LOOP(motion->size.width, motion->size.height)
+    {
+        if(x == 0 || x == motion->size.width - 1) continue;
+        if(y == 0 || y == motion->size.height - 1) continue;
+
+        short has = 0;
+        has += PMOTION_XY(motion, x-1,  y-1);
+        has += PMOTION_XY(motion, x,    y-1);
+        has += PMOTION_XY(motion, x+1,  y-1);
+
+        has += PMOTION_XY(motion, x-1,  y+1);
+        has += PMOTION_XY(motion, x,    y+1);
+        has += PMOTION_XY(motion, x+1,  y+1);
+
+        has += PMOTION_XY(motion, x-1, y);
+        has += PMOTION_XY(motion, x+1, y);
+
+        has += PMOTION_XY(motion, x, y);
+
+
+        newmotion[x + y * motion->size.width] = has > 1 ? PIXEL_MOTION : PIXEL_NOMOTION;
+    }
+
+    delete [] motion->motion;
+    motion->motion = newmotion;
+}
 
 pixel_t* _pix;
 void inline SetPixelRed(CDetectorImage* Img, int x, int y)

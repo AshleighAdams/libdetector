@@ -70,6 +70,8 @@ namespace Detector
         unsigned char b;
     };
 
+    typedef pixel_t color_t; // Whatever makes sense to you
+
     class CDetectorBaseClass
     {
     public:
@@ -166,6 +168,7 @@ namespace Detector
 
     float Distance(position_t &a, position_t &b);
     void MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount, float flMaxChange);
+    void BlurMotion(motion_t* Motion);
 
     struct ssize_t
     {
@@ -213,6 +216,8 @@ namespace Detector
     class CDescriptorValue : public CDetectorBaseClass
     {
     public:
+        CDescriptorValue(){ m_iRefrenceCount = 1; }
+        ~CDescriptorValue();
         int g_Count;
         float* g_Values;
     };

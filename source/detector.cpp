@@ -139,6 +139,7 @@ CDetector::CDetector( imagesize_t Size )
 {
 	m_sSize = Size;
 	m_pRefrenceImage = NULL;
+	m_pMotionImage = NULL;
 	m_sDiffrenceThreshold = 50;
 	m_iTargets = 0;
 	m_flMinTargSize = .05f;
@@ -147,6 +148,9 @@ CDetector::CDetector( imagesize_t Size )
     m_pDescriptor = NULL;
     m_flBlurAmmount = .1f;
     m_flBlurMaxChange = 1.f;
+    m_BlurUpdateRate = 10; // So we can slow the update rate of the background image
+    m_BlurUpdateRateFrame = 0;
+    m_flTotalMotion = 0.f;
 }
 
 CDetector::~CDetector()
@@ -178,6 +182,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 {
 	if( !imagesize_tEqual( pImage->GetSize(), m_sSize ) )
 		return false;
+    m_iFalsePos = 0;
 	pImage->Refrence();
 	if( !m_pRefrenceImage )
 	{
@@ -192,16 +197,26 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			delete m_pTargets[i];
 		m_pTargets[i] = 0;
 	}
-	motion_t* motion = AbsoluteDiffrence( this, pImage, m_pRefrenceImage );
+
+	if(m_pMotionImage)
+	{
+	    delete [] m_pMotionImage->motion;
+        delete m_pMotionImage;
+	}
+
+	m_pMotionImage = AbsoluteDiffrence( this, pImage, m_pRefrenceImage );
+	BlurMotion(m_pMotionImage);
+
 	int w, h;
-	w = motion->size.width;
-	h = motion->size.height;
+	w = m_pMotionImage->size.width;
+	h = m_pMotionImage->size.height;
 	int count = 0;
+
 	XY_LOOP( w, h )
 	{
-		if( PMOTION_XY( motion, x, y ) == PIXEL_MOTION )
+		if( PMOTION_XY( m_pMotionImage, x, y ) == PIXEL_MOTION )
 		{
-			motionhelper_t* helper = GetBoundsFromMotion( motion, w, h, x, y );
+			motionhelper_t* helper = GetBoundsFromMotion( m_pMotionImage, w, h, x, y );
 
 			target_t* targ = new target_t;
 			targ->x = ( float )helper->MinX / ( float )w;
@@ -209,23 +224,24 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			targ->width = ( float )( helper->MaxX - helper->MinX ) / ( float )w;
 			targ->height = ( float )( helper->MaxY - helper->MinY ) / ( float )h;
 
-            if( m_pDescriptor && targ->height + targ->width < m_flMinTargSize )
+            if( m_pDescriptor && (targ->height + targ->width) > m_flMinTargSize )
             {
                 motion_t* movement = new motion_t;
                 movement->size.height = helper->MaxY - helper->MinY;
                 movement->size.width = helper->MaxX - helper->MinX;
                 movement->motion = new unsigned char[x * y * movement->size.width];
 
-                XY_LOOP_START(helper->MinX, helper->MinY,
-                              helper->MaxX, helper->MaxY)
-                {
-                    if(PMOTION_XY(helper, x, y) == PIXEL_SCANNEDMOTION)
-                        PMOTION_XY(movement, x, y) = PIXEL_MOTION;
-                }
+                for(int ly = helper->MinY; ly < helper->MaxY; ly++)
+                    for(int lx = helper->MinX; lx < helper->MaxX; lx++)
+                    {
+                        if(PMOTION_XY(helper, lx, ly) == PIXEL_SCANNEDMOTION)
+                            PMOTION_XY(movement, lx, ly) = PIXEL_MOTION;
+                    }
 
 
-                //CDescriptorValue* Descriptor = m_pDescriptor->GetDescriptor(movement);
-                //Descriptor->UnRefrence();
+                CDescriptorValue* Descriptor = m_pDescriptor->GetDescriptor(movement);
+
+                Descriptor->UnRefrence();
 
                 delete [] movement->motion;
                 delete movement;
@@ -236,6 +252,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			if( targ->height + targ->width < m_flMinTargSize )
 			{
 				delete targ; // Pfft, this target is too small
+				m_iFalsePos++;
 				continue;
 			}
 
@@ -249,13 +266,37 @@ EndLoop:
 
 	m_iTargets = count;
 
-	MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
+    int MaxSetPixels = m_sSize.width + m_sSize.height * m_sSize.width;
+    int SetPixels = 0;
+
+    XY_LOOP(m_sSize.width, m_sSize.height)
+        if(PMOTION_XY(m_pMotionImage, x,y) > 0) SetPixels++;
+
+    m_flTotalMotion = (float)SetPixels / (float)MaxSetPixels;
+
+    if(m_bCleverBackground) // Not implented yet
+    {
+        if(m_iFalsePos > 5);
+        {
+            // this will be a per pixel update, no blur, all manual
+            MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
+        }
+    }else
+    {
+        m_BlurUpdateRateFrame++;
+        if(m_BlurUpdateRateFrame == m_BlurUpdateRate)
+        {
+            MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
+            m_BlurUpdateRateFrame = 0;
+        }else if(m_flTotalMotion > 0.5f)
+        {
+            MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, 999.f);
+        }
+    }
+
 	//m_pRefrenceImage->UnRefrence();
 	//m_pRefrenceImage = pImage->Exclusive();
 	pImage->UnRefrence();
-
-	delete [] motion->motion;
-	delete motion;
 
 	return true;
 }
