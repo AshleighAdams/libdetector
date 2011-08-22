@@ -139,12 +139,12 @@ void Detector::BlurMotion(motion_t* motion)
         blur = 0;
 
         start = max(0, y - blursize);
-        end = min(h, y + blursize - 1);
+        end = min(h, y + blursize + 1);
         for(int i = start; i < end; i++)
             blur += PMOTION_XY(motion, x, i);
 
         start = max(0, x - blursize);
-        end = min(w, x + blursize - 1);
+        end = min(w, x + blursize + 1);
         for(int i = start; i < end; i++)
             blur += PMOTION_XY(motion, i, y);
 
