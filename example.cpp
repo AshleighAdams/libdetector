@@ -1,3 +1,4 @@
+// You need a compiler that supports 0x!
 #include <iostream>
 #include <thread>
 
