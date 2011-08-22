@@ -15,14 +15,11 @@ unsigned char DiffrenceBetween( unsigned char a, unsigned char b )
 	return ( unsigned char )x;
 }
 
-motion_t* Detector::AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 )
+void Detector::AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2, motion_t* Target )
 {
-	motion_t* motion = new motion_t();
-	motion->size = img1->GetSize();
-	int w, h;
-	w = motion->size.width;
-	h = motion->size.height;
-	motion->motion = new unsigned char[w+h*w];
+    int w, h;
+	w = Target->size.width;
+	h = Target->size.height;
 
 	pixel_t* pix1;
 	pixel_t* pix2;
@@ -39,11 +36,10 @@ motion_t* Detector::AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CD
 		short totaldiff = diff_r + diff_g + diff_b;
 
 		if( totaldiff > self->m_sDiffrenceThreshold )
-			PMOTION_XY( motion, x, y ) = PIXEL_MOTION;
+			PMOTION_XY( Target, x, y ) = PIXEL_MOTION;
 		else
-			PMOTION_XY( motion, x, y ) = PIXEL_NOMOTION;
+			PMOTION_XY( Target, x, y ) = PIXEL_NOMOTION;
 	}
-	return motion;
 }
 
 void DoNextScanLine( int x, int y, motionhelper_t* motion )
@@ -141,6 +137,11 @@ CDetector::CDetector( imagesize_t Size )
 	m_pRefrenceImage = NULL;
 	m_pMotionImage = NULL;
 	m_sDiffrenceThreshold = 50;
+
+	m_pMotionImage = new motion_t();
+	m_pMotionImage->size = Size;
+	m_pMotionImage->motion = new unsigned char[Size.width + Size.height * Size.width];
+
 	m_iTargets = 0;
 	m_flMinTargSize = .05f;
 	for( int i = 0; i < MAX_TARGETS; i++ )
@@ -157,6 +158,10 @@ CDetector::~CDetector()
 {
 	m_pRefrenceImage->UnRefrence();
 	m_pDescriptor->UnRefrence();
+    m_pIgnoreMotionImage->UnRefrence();
+
+	delete [] m_pMotionImage->motion;
+    delete m_pMotionImage;
 
     // Make sure all the targets are deleted
 	for( int i = 0; i < MAX_TARGETS; i++ )
@@ -198,13 +203,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 		m_pTargets[i] = 0;
 	}
 
-	if(m_pMotionImage)
-	{
-	    delete [] m_pMotionImage->motion;
-        delete m_pMotionImage;
-	}
-
-	m_pMotionImage = AbsoluteDiffrence( this, pImage, m_pRefrenceImage );
+	AbsoluteDiffrence( this, pImage, m_pRefrenceImage, m_pMotionImage );
 	BlurMotion(m_pMotionImage);
 
 	int w, h;
@@ -330,4 +329,44 @@ void CDetector::SetMinTargSize( float flAmmount )
 {
 	m_flMinTargSize = flAmmount;
 }
+
+unsigned int CDetector::GetFalsePosCount()
+{
+    return m_iFalsePos;
+}
+
+float CDetector::GetTotalMotion()
+{
+    return m_flTotalMotion;
+}
+
+motion_t* CDetector::GetMotionImage()
+{
+    return m_pMotionImage;
+}
+
+void CDetector::SetIgnoreImage(CDetectorImage* pImage)
+{
+    if(m_pIgnoreMotionImage)
+        m_pIgnoreMotionImage->UnRefrence();
+
+    m_pIgnoreMotionImage = pImage; // TODO: Debating whether to use Exclusive (people can change after it's been set, eg, draw on it
+
+    if(m_pIgnoreMotionImage)
+        m_pIgnoreMotionImage->Refrence();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

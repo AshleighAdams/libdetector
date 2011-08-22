@@ -24,7 +24,7 @@ namespace Detector
 
     class CDetector : public IDetector
     {
-        friend motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );
+        friend void Detector::AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2, motion_t* Target );
     public:
         CDetector( imagesize_t Size );
         ~CDetector();
@@ -42,9 +42,19 @@ namespace Detector
         void SetDescriptor(IDescriptor* Descriptor);
         // Set motion blur ammount
         void SetMotionBlur(float flAmmount);
+
+        // TODO: Below needs implenting
+
+        // Returns the number of targets that are too small and removed
         unsigned int GetFalsePosCount();
+        // Gets the total motion (0 being none, 1 being all)
+        float GetTotalMotion();
+        // Gets the motion image
+        motion_t* GetMotionImage();
+        // Sets the ignore image, ignore motion in these regions
+        void SetIgnoreImage(CDetectorImage* Image);
     protected:
-    public:
+    private:
         imagesize_t         m_sSize;
         CDetectorImage*     m_pRefrenceImage;       // This is the image used to compare to
         motion_t*           m_pMotionImage;         // Usefull for testing
@@ -60,6 +70,7 @@ namespace Detector
         int                 m_BlurUpdateRate;
         int                 m_BlurUpdateRateFrame;
         float               m_flTotalMotion;
+        CDetectorImage*     m_pIgnoreMotionImage;
     };
 
     motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );
