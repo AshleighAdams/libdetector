@@ -85,13 +85,21 @@ int ::clock_gettime( int X, struct timeval* tv )
 }
 #endif // WINDOWS
 
+double StartTime = -1.0;
 double Detector::GetCurrentTime()
 {
+    if(StartTime < 0.0)
+    {
+        struct timespec now;
+        clock_gettime( CLOCK_MONOTONIC, &now );
+
+        StartTime = ( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec;
+    }
 	struct timespec now;
 	clock_gettime( CLOCK_MONOTONIC, &now );
 
-    return ( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec; // Why was I deviding by 0?
-	return ( double )( now.tv_nsec ) / 1000.0 + ( double )now.tv_sec;
+    return (( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec) - StartTime; // Why was I deviding by 0?
+	//return ( double )( now.tv_nsec ) / 1000.0 + ( double )now.tv_sec;
 }
 
 bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
@@ -117,7 +125,36 @@ void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float f
 }
 
 // This blur is so the "blobs" join together much better
+
 void Detector::BlurMotion(motion_t* motion)
+{
+    unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
+    int w = motion->size.width;
+    int h = motion->size.height;
+    int blursize = 3;
+
+    int blur, start, end;
+    XY_LOOP(w,h)
+    {
+        blur = 0;
+
+        start = max(0, y - blursize);
+        end = min(h, y + blursize - 1);
+        for(int i = start; i < end; i++)
+            blur += PMOTION_XY(motion, x, i);
+
+        start = max(0, x - blursize);
+        end = min(w, x + blursize - 1);
+        for(int i = start; i < end; i++)
+            blur += PMOTION_XY(motion, i, y);
+
+        newmotion[x + y * w] = blur > 0; // Change to >1 to reduce noise
+    }
+    delete [] motion->motion;
+    motion->motion = newmotion;
+}
+
+void S_BlurMotion(motion_t* motion)
 {
     unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
 
