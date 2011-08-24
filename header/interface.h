@@ -166,8 +166,11 @@ namespace Detector
         float y;
     };
 
+    // Distance between 2 targets
     float Distance(position_t &a, position_t &b);
+    // Used to motionblur the refrence image over time
     void MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount, float flMaxChange);
+    // Used to blur the motion image (so it can find bounds much better)
     void BlurMotion(motion_t* Motion);
 
     struct ssize_t
@@ -176,6 +179,7 @@ namespace Detector
         float h;
     };
 
+    // Time since the program started
     double GetCurrentTime();
 
     class IDetectorObjectTracker;
@@ -194,7 +198,8 @@ namespace Detector
         double      LastSeen();
         float       GetScore(target_t* Target);
         void        Update(position_t& pos, ssize_t& size);
-        void        SimulateUpdate(); // If the target was not found
+        // If the target was not found simulate update
+        void        SimulateUpdate();
         bool operator ==(CTrackedObject* a);
     private:
         ssize_t     m_sSize;

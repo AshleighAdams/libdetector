@@ -80,17 +80,18 @@ namespace Detector
     public:
         CObjectTracker();
         ~CObjectTracker();
+        // Update the targets
         void PushTargets( target_t* Targets[MAX_TARGETS], int Count );
         TrackedObjects* GetTrackedObjects();
         // The target will still exist and simulate if the target goes out of view
         void SetLastSeenLifeTime(float flAmmount);
-        // Rather than the target being asigned to the wrong object, it instead creates a new one
+        // Sets new target threshold
         void SetNewTargetThreshold(float flAmmount);
         // Self explanitary
         void SetEvent(EventType type, void* function);
     private:
         float               m_flLastSeenLifeTime;       // Remove a target if we havn't seen them for this long
-        float               m_flNewTargetThreshold;     // See SetNewTargetThreshold
+        float               m_flNewTargetThreshold;     // Rather than the target being asigned to the wrong object, it instead creates a new one
         float               m_flNewTargetTimeThreshold; // A new target will be created if a target has gone untracked for this ammount of time
         float               m_flNewTargetTime;          // The actual time that is being counted
         TrackedObjects      m_TrackedObjects;           // ...
