@@ -20,8 +20,6 @@ namespace Detector
     typedef void(*LostTargetFn)(CTrackedObject* Obj);
     const EventType EVENT_LOST = 2;
 
-    float GetDescriptor(motion_t* Motion);
-
     class CDetector : public IDetector
     {
         friend void Detector::AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2, motion_t* Target );
@@ -55,24 +53,26 @@ namespace Detector
         void SetIgnoreImage(CDetectorImage* Image);
     protected:
     private:
-        imagesize_t         m_sSize;
+        imagesize_t         m_sSize;                // Size of the supplied images
         CDetectorImage*     m_pRefrenceImage;       // This is the image used to compare to
         motion_t*           m_pMotionImage;         // Usefull for testing
-        unsigned char       m_sDiffrenceThreshold;
+        unsigned char       m_sDiffrenceThreshold;  // If it goes above this, it is registerd as motion
         target_t*           m_pTargets[MAX_TARGETS];
-        int                 m_iTargets;
-        float               m_flMinTargSize;
-        IDescriptor*        m_pDescriptor;
-        float               m_flBlurAmmount;
-        float               m_flBlurMaxChange;
-        unsigned int        m_iFalsePos;
-        bool                m_bCleverBackground; // Background that doesn't update unless there is noise
-        int                 m_BlurUpdateRate;
-        int                 m_BlurUpdateRateFrame;
-        float               m_flTotalMotion;
-        CDetectorImage*     m_pIgnoreMotionImage;
+        int                 m_iTargets;             // Number of targets
+        int                 m_iFalsePos;            // Number of targets removed
+        float               m_flMinTargSize;        // If a target is smaller than this, it's removed and m_iFalsePos is increased
+        IDescriptor*        m_pDescriptor;          // The class that will identify what a target is
+        float               m_flBlurAmmount;        // How much to blur the image per update (Motion blur on the background)
+        float               m_flBlurMaxChange;      // Max it's allowed to change (Stop contrasting targets leaving a hige trail behind)
+        int                 m_BlurUpdateRate;       // How many frames to do a background update
+        int                 m_BlurUpdateRateFrame;  // Current frame (from 0 to m_BlurUpdateRate)
+        bool                m_bCleverBackground;    // Background that doesn't update unless there is noise
+        float               m_flTotalMotion;        // Total motion in the image.
+        color_t*            m_pMotionPixel;         // \/
+        CDetectorImage*     m_pIgnoreMotionImage;   // TODO: . Checks this image, and if any pixels are m_pMotionPixel, they are removed from the motion image
     };
 
+    // Finds the absolute diffrence between 2 images.
     motion_t* AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2 );
 
     class CObjectTracker : public IObjectTracker
@@ -82,19 +82,22 @@ namespace Detector
         ~CObjectTracker();
         void PushTargets( target_t* Targets[MAX_TARGETS], int Count );
         TrackedObjects* GetTrackedObjects();
-        void SetLastSeenLifeTime(float flAmmount); // The target will still exist and simulate if the target goes out of view
+        // The target will still exist and simulate if the target goes out of view
+        void SetLastSeenLifeTime(float flAmmount);
+        // Rather than the target being asigned to the wrong object, it instead creates a new one
         void SetNewTargetThreshold(float flAmmount);
+        // Self explanitary
         void SetEvent(EventType type, void* function);
     private:
-        float               m_flLastSeenLifeTime;
-        float               m_flNewTargetThreshold;
-        float               m_flNewTargetTimeThreshold;
-        float               m_flNewTargetTime;
-        TrackedObjects      m_TrackedObjects;
-        targetid            m_CurrentID;
-        NewTargetFn         m_pNewTargEvent;
-        UpdateTargetFn      m_pUpdateEvent;
-        LostTargetFn        m_pLostTargEvent;
+        float               m_flLastSeenLifeTime;       // Remove a target if we havn't seen them for this long
+        float               m_flNewTargetThreshold;     // See SetNewTargetThreshold
+        float               m_flNewTargetTimeThreshold; // A new target will be created if a target has gone untracked for this ammount of time
+        float               m_flNewTargetTime;          // The actual time that is being counted
+        TrackedObjects      m_TrackedObjects;           // ...
+        targetid            m_CurrentID;                // This is increased and asigned to new targets
+        NewTargetFn         m_pNewTargEvent;            // /*
+        UpdateTargetFn      m_pUpdateEvent;             //      Event func ptrs
+        LostTargetFn        m_pLostTargEvent;           // */
     };
 
     // Really simple, 3 density rings
