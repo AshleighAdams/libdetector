@@ -5,7 +5,7 @@
 #include <cmath>
 
 #define DETECTOR_INTERNAL
-#include "../header/libdetector.h"
+#include "../include/libdetector.h"
 using namespace Detector;
 
 

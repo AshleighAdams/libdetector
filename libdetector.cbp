@@ -34,13 +34,14 @@
 				</Linker>
 			</Target>
 		</Build>
-		<Unit filename="header/interface.h" />
-		<Unit filename="header/libdetector.h" />
-		<Unit filename="source/detector.cpp" />
-		<Unit filename="source/discriptor.cpp" />
-		<Unit filename="source/object.cpp" />
-		<Unit filename="source/tracker.cpp" />
-		<Unit filename="source/util.cpp" />
+		<Unit filename="include/interface.h" />
+		<Unit filename="include/libdetector.h" />
+		<Unit filename="src/detector.cpp" />
+		<Unit filename="src/discriptor.cpp" />
+		<Unit filename="src/image.cpp" />
+		<Unit filename="src/object.cpp" />
+		<Unit filename="src/tracker.cpp" />
+		<Unit filename="src/util.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />

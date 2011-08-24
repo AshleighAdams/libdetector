@@ -1,7 +1,7 @@
 #include <iostream>
 #include <thread>
 
-#include "libdetector/header/libdetector.h"
+#include "libdetector/include/libdetector.h"
 
 #define XY_LOOP(_w_,_h_) for(int y = 0; y < _h_; y++) for(int x = 0; x < _w_; x++)
 #define PMOTION_XY(_struct_, x, y) _struct_->motion[(x) + (y) * _struct_->size.width]
