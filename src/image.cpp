@@ -69,7 +69,7 @@ pixel_t* SETPIX_pix;
 
 #define RESTRAIN(_x_) _x_ = max(0.f, min(1.f, _x_))
 
-void CDetectorImage::DrawBox(position_t a, position_t b)
+void CDetectorImage::DrawBox(position_t& a, position_t& b)
 {
     RESTRAIN(a.x);
     RESTRAIN(a.y);
@@ -124,8 +124,42 @@ void CDetectorImage::DrawTarget(target_t* pTarget)
     DrawBox(a, b);
 }
 
-void CDetectorImage::DrawLine(position_t a, position_t b)
+void CDetectorImage::DrawLine(position_t& a, position_t& b)
 {
+    RESTRAIN(a.x);
+    RESTRAIN(a.y);
+
+    RESTRAIN(b.x);
+    RESTRAIN(b.y);
+
+    int     x0 = a.x * m_sSize.width,
+            y0 = a.y * m_sSize.height,
+            x1 = b.x * m_sSize.width,
+            y1 = b.y * m_sSize.height;
+    int dx = abs(x1 - x0);
+    int dy = abs(y1 - y0);
+
+    int sx = x0 < x1 ? 1 : -1;
+    int sy = y0 < y1 ? 1 : -1;
+
+    int err = dx - dy;
+    int e2;
+    while(true)
+    {
+        SETPIX(x0,y0);
+        if(x0 == x1 && y0 == y1) break;
+        e2 = 2 * err;
+        if(e2 > -dy)
+        {
+            err -= dy;
+            x0 += sx;
+        }
+        if(e2 < dx)
+        {
+            err += dx;
+            y0 += sy;
+        }
+    }
 }
 
 

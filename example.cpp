@@ -112,6 +112,15 @@ bool ProccessFrame(CDetectorImage* Image)
         Image->DrawTarget(Obj);
         //DrawTarget(Image, Obj);
     }
+
+    position_t a;
+    position_t b;
+    a.x = 0.1;
+    a.y = 0.1;
+    b.x = 0.9;
+    b.y = 0.9;
+    Image->DrawLine(a,b);
+
     return ret;
 }
 

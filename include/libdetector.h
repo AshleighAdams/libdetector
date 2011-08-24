@@ -31,10 +31,10 @@ namespace Detector
         imagesize_t GetSize();
         // Now for some usefull functions
         void DrawColor(color_t Col);
-        void DrawBox(position_t a, position_t b);
+        void DrawBox(position_t& a, position_t& b);
         void DrawTarget(CTrackedObject* pObj);
         void DrawTarget(target_t* pTarget);
-        void DrawLine(position_t a, position_t b);
+        void DrawLine(position_t& a, position_t& b);
     private:
         imagesize_t m_sSize;
         pixel_t* m_psPixels;
