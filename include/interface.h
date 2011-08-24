@@ -37,7 +37,6 @@ unsigned char DiffrenceBetween( unsigned char a, unsigned char b );
 
 namespace Detector
 {
-
     struct imagesize_t
     {
         int width;
@@ -203,6 +202,11 @@ namespace Detector
         virtual CDescriptorValue* GetDescriptor(motion_t* Motion) = 0;
         virtual char* GetName(CDescriptorValue* Descriptor, int Count) = 0;
     };
-
 }
+
+// If OpenCV exists, lets provide some helper stuff
+#ifdef DETECTOR_OPENCV
+#include "opencvhelper.h"
+#endif
+
 #endif // LIB_DET_INTERFACE_H

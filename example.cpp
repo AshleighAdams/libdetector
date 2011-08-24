@@ -1,75 +1,22 @@
-#include <iostream>
+// STL includes
 #include <thread>
-
-#include "libdetector/include/libdetector.h"
-
-#define XY_LOOP(_w_,_h_) for(int y = 0; y < _h_; y++) for(int x = 0; x < _w_; x++)
-#define PMOTION_XY(_struct_, x, y) _struct_->motion[(x) + (y) * _struct_->size.width]
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <time.h>
+#include <string.h>
+#include <vector>
+#include <list>
 using namespace std;
-using namespace Detector;
 
+// OpenCV includes
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
-
-CDetectorImage* Ret = NULL;
-CDetectorImage* GetDetectorImage(IplImage* Frame)
-{
-    if(!Ret)
-    {
-        imagesize_t size;
-        size.height = Frame->height;
-        size.width = Frame->width;
-        Ret = new CDetectorImage(size);
-        cout << "Created new image.\n";
-        cout << Frame->width << " :: " << Frame->height << "\n";
-    }
-
-    char* imgdata = Frame->imageData;
-    int widthstep = Frame->widthStep;
-    pixel_t* pix;
-
-
-    XY_LOOP(Frame->width, Frame->height)
-    {
-        pix = Ret->Pixel(x,y);
-        pix->b = ((unsigned char*)(imgdata + widthstep * y))[x*3];
-        pix->g = ((unsigned char*)(imgdata + widthstep * y))[x*3+1];
-        pix->r = ((unsigned char*)(imgdata + widthstep * y))[x*3+2];
-    }
-    return Ret;
-}
-
-void UpdateFrame(CDetectorImage* Img, IplImage* Frame)
-{
-    char* imgdata = Frame->imageData;
-    int widthstep = Frame->widthStep;
-    pixel_t* pix;
-
-    XY_LOOP(Frame->width, Frame->height)
-    {
-        pix = Img->Pixel(x,y);
-        ((unsigned char*)(imgdata + widthstep * y))[x*3] = pix->b;
-        ((unsigned char*)(imgdata + widthstep * y))[x*3+1] = pix->g;
-        ((unsigned char*)(imgdata + widthstep * y))[x*3+2] = pix->r;
-    }
-}
-
-void UpdateFrame(motion_t* motion, IplImage* Frame)
-{
-    char* imgdata = Frame->imageData;
-    int widthstep = Frame->widthStep;
-
-    unsigned char amm;
-    XY_LOOP(Frame->width, Frame->height)
-    {
-        amm = (PMOTION_XY(motion, x, y)) ? 255 : 0;
-        ((unsigned char*)(imgdata + widthstep * y))[x*3] = amm;
-        ((unsigned char*)(imgdata + widthstep * y))[x*3+1] = amm;
-        ((unsigned char*)(imgdata + widthstep * y))[x*3+2] = amm;
-    }
-}
+// Detector includes (must be after OpenCV)
+#define DETECTOR_OPENCV
+#include "libdetector/include/libdetector.h"
+using namespace Detector;
 
 void NewObject(CTrackedObject* Obj)
 {
@@ -81,10 +28,8 @@ void LastObject(CTrackedObject* Obj)
     cout << "Lost object! @ " << GetCurrentTime() << "\n";
 }
 
-
-CDetector* detector = NULL;
-CObjectTracker* tracker = NULL;
-
+CDetector* g_pDetector = NULL;
+CObjectTracker* g_pTracker = NULL;
 
 // Settings n stuff
 bool g_bWriteFrame = false;
@@ -108,7 +53,7 @@ void SettingsThread()
             cout << "Enter ammount: \n";
             short amm;
             cin >> amm;
-            detector->SetDiffrenceThreshold(amm);
+            g_pDetector->SetDiffrenceThreshold(amm);
         }else if(strcmp(input, "exit") == 0)
         {
             g_bExiting = true;
@@ -120,32 +65,32 @@ void SettingsThread()
     }
 }
 
-target_t* Targets[MAX_TARGETS];
-int Count = 0;
+target_t* g_Targets[MAX_TARGETS];
+int g_Count = 0;
 
 bool ProccessFrame(CDetectorImage* Image)
 {
-    if(!detector && !tracker)
+    if(!g_pDetector && !g_pTracker)
     {
-        detector = new CDetector(Image->GetSize());
+        g_pDetector = new CDetector(Image->GetSize());
 
-        CBaseDescriptor* Disc = new CBaseDescriptor();
-        //detector->SetDescriptor(Disc);
+        //CBaseDescriptor* Disc = new CBaseDescriptor();
+        //g_pDetector->SetDescriptor(Disc);
 
-        tracker = new CObjectTracker();
-        tracker->SetEvent(EVENT_NEWTARG,    (void*)&NewObject);
-        tracker->SetEvent(EVENT_LOST,       (void*)&LastObject);
+        g_pTracker = new CObjectTracker();
+        g_pTracker->SetEvent(EVENT_NEWTARG,    (void*)&NewObject);
+        g_pTracker->SetEvent(EVENT_LOST,       (void*)&LastObject);
     }
-    detector->PushImage(Image);
-    Count = detector->GetTargets(Targets);
+    g_pDetector->PushImage(Image);
+    g_Count = g_pDetector->GetTargets(g_Targets);
 
-    tracker->PushTargets(Targets, Count);
+    g_pTracker->PushTargets(g_Targets, g_Count);
 
-    TrackedObjects Objs = *tracker->GetTrackedObjects();
+    TrackedObjects Objs = *g_pTracker->GetTrackedObjects();
 
-    for(int i = 0; i < Count; i++)
+    for(int i = 0; i < g_Count; i++)
     {
-        target_t* Targ = Targets[i];
+        target_t* Targ = g_Targets[i];
         DrawTarget(Image, Targ);
     }
     bool ret = false;
@@ -157,28 +102,29 @@ bool ProccessFrame(CDetectorImage* Image)
     return ret;
 }
 
+CDetectorImage* g_pDetectorImage;
+
 int main()
 {
     std::thread thrd(SettingsThread);
 
-    CvCapture* capture = cvCaptureFromCAM( 1 );
+    CvCapture* capture = cvCaptureFromCAM( 0 );
+
+    if ( !capture )
+    {
+        fprintf( stderr, "ERROR: capture is NULL \n" );
+        return 1;
+    }
 
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 320);
     cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 260);
     cvSetCaptureProperty(capture, CV_CAP_PROP_FOURCC, CV_FOURCC('I', 'Y', 'U', 'V'));
 
-
-    if ( !capture )
-    {
-        fprintf( stderr, "ERROR: capture is NULL \n" );
-        return -1;
-    }
-
     IplImage* frame = cvQueryFrame( capture );
     if ( !frame )
     {
         fprintf( stderr, "ERROR: frame is null...\n" );
-        return 0;
+        return 1;
     }
 
     // let the cam initiate
@@ -210,28 +156,27 @@ int main()
         if ( !frame )
         {
             fprintf( stderr, "ERROR: frame is null...\n" );
-            getchar();
             break;
         }
 
+        if(!g_pDetectorImage)
+            g_pDetectorImage = new CDetectorImage(frame->width, frame->height);
+        UpdateFrame(frame, g_pDetectorImage);
 
-        CDetectorImage* img = GetDetectorImage(frame);
-        bool WriteFrame = ProccessFrame(img);
-        UpdateFrame(img, frame);
+        bool WriteFrame = ProccessFrame(g_pDetectorImage);
+        UpdateFrame(g_pDetectorImage, frame);
 
         if(WriteFrame && g_bWriteFrame)
             cvWriteFrame(writer, frame);
 
         cvShowImage( "Detector", frame );
 
-        if(detector->GetMotionImage())
+        if(g_pDetector->GetMotionImage())
         {
-            UpdateFrame(detector->GetMotionImage(), frame);
+            UpdateFrame(g_pDetector->GetMotionImage(), frame);
             cvShowImage( "Detector - Motion", frame );
         }
-        // Do not release the frame!
-        //If ESC key pressed, Key=0x10001B under OpenCV 0.9.7(linux version),
-        //remove higher bits using AND operator
+        // Enter breaks loop
         if ( (cvWaitKey(10) & 255) == 27 ) break;
     }
     // Release the capture device housekeeping
