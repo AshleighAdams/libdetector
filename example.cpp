@@ -7,15 +7,16 @@
 #include <string.h>
 #include <vector>
 #include <list>
-using namespace std;
 
 // OpenCV includes
+using namespace std; // OpenCV needs this else we get 500 errors....
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
 // Detector includes (must be after OpenCV)
 #define DETECTOR_OPENCV
 #include "libdetector/include/libdetector.h"
+
 using namespace Detector;
 
 void NewObject(CTrackedObject* Obj)
@@ -61,7 +62,6 @@ void SettingsThread()
         }
         else
             cout << "Setting not found\n";
-
     }
 }
 
@@ -88,16 +88,29 @@ bool ProccessFrame(CDetectorImage* Image)
 
     TrackedObjects Objs = *g_pTracker->GetTrackedObjects();
 
+    color_t NoneTrackedCol;
+    color_t TrackedCol;
+
+    NoneTrackedCol.r = 255;
+    NoneTrackedCol.g = 0;
+    NoneTrackedCol.b = 0;
+
+    TrackedCol.r = 0;
+    TrackedCol.g = 255;
+    TrackedCol.b = 0;
+
+    Image->DrawColor(NoneTrackedCol);
     for(int i = 0; i < g_Count; i++)
-    {
-        target_t* Targ = g_Targets[i];
-        DrawTarget(Image, Targ);
-    }
+        Image->DrawTarget(g_Targets[i]);
+
     bool ret = false;
+    Image->DrawColor(TrackedCol);
+
     for(CTrackedObject* Obj : Objs)
     {
         ret = true;
-        DrawTarget(Image, Obj);
+        Image->DrawTarget(Obj);
+        //DrawTarget(Image, Obj);
     }
     return ret;
 }
@@ -106,7 +119,7 @@ CDetectorImage* g_pDetectorImage;
 
 int main()
 {
-    std::thread thrd(SettingsThread);
+    thread thrd(SettingsThread);
 
     CvCapture* capture = cvCaptureFromCAM( 0 );
 

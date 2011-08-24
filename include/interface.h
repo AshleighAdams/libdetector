@@ -37,6 +37,8 @@ unsigned char DiffrenceBetween( unsigned char a, unsigned char b );
 
 namespace Detector
 {
+    class CDetectorImage;
+
     struct imagesize_t
     {
         int width;
@@ -87,21 +89,6 @@ namespace Detector
         };
     protected:
         int m_iRefrenceCount;
-    };
-
-
-    class CDetectorImage : public CDetectorBaseClass // Immutable
-    {
-    public:
-        CDetectorImage( int Width, int Height );
-        CDetectorImage( imagesize_t size );
-        ~CDetectorImage();
-        CDetectorImage* Exclusive();
-        pixel_t* Pixel( int x, int y );
-        imagesize_t GetSize();
-    private:
-        imagesize_t m_sSize;
-        pixel_t* m_psPixels;
     };
 
     struct target_t
@@ -203,10 +190,4 @@ namespace Detector
         virtual char* GetName(CDescriptorValue* Descriptor, int Count) = 0;
     };
 }
-
-// If OpenCV exists, lets provide some helper stuff
-#ifdef DETECTOR_OPENCV
-#include "opencvhelper.h"
-#endif
-
 #endif // LIB_DET_INTERFACE_H

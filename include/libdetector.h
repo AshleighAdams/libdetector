@@ -20,6 +20,27 @@ namespace Detector
     typedef void(*LostTargetFn)(CTrackedObject* Obj);
     const EventType EVENT_LOST = 2;
 
+    class CDetectorImage : public CDetectorBaseClass
+    {
+    public:
+        CDetectorImage( int Width, int Height );
+        CDetectorImage( imagesize_t size );
+        ~CDetectorImage();
+        CDetectorImage* Exclusive();
+        pixel_t* Pixel( int x, int y );
+        imagesize_t GetSize();
+        // Now for some usefull functions
+        void DrawColor(color_t Col);
+        void DrawBox(position_t a, position_t b);
+        void DrawTarget(CTrackedObject* pObj);
+        void DrawTarget(target_t* pTarget);
+        void DrawLine(position_t a, position_t b);
+    private:
+        imagesize_t m_sSize;
+        pixel_t* m_psPixels;
+        color_t m_DrawColor;
+    };
+
     class CDetector : public IDetector
     {
         friend void Detector::AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2, motion_t* Target );
@@ -111,9 +132,12 @@ namespace Detector
     private:
     };
 
-    // Util funcs
-    void DrawTarget(CDetectorImage* Img, CTrackedObject* Obj);
-    void DrawTarget(CDetectorImage* Img, target_t* Targ);
 } // End Namespace
+
+
+// If OpenCV exists, lets provide some helper stuff
+#ifdef DETECTOR_OPENCV
+#include "opencvhelper.h"
+#endif
 
 #endif // LIB_DET_H
