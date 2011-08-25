@@ -1,4 +1,3 @@
-
 #include "string.h"
 #include <iostream>
 #include <exception>
@@ -152,6 +151,7 @@ CDetector::CDetector( imagesize_t Size )
     m_BlurUpdateRate = 10; // So we can slow the update rate of the background image
     m_BlurUpdateRateFrame = 0;
     m_flTotalMotion = 0.f;
+
 }
 
 CDetector::~CDetector()

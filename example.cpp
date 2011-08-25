@@ -99,6 +99,8 @@ CObjectTracker* g_pTracker = NULL;
 // Settings n stuff
 bool g_bWriteFrame = false;
 bool g_bExiting = false;
+short g_Sensetivity;
+double g_NextTime;
 
 void SettingsThread()
 {
@@ -168,14 +170,32 @@ bool ProccessFrame(CDetectorImage* Image)
     for(int i = 0; i < g_Count; i++)
         Image->DrawTarget(g_Targets[i]);
 
-    bool ret = false;
     Image->DrawColor(TrackedCol);
-
+    bool ret = false;
     for(CTrackedObject* Obj : Objs)
     {
         ret = true;
         Image->DrawTarget(Obj);
         DrawTrails(Image, Obj);
+    }
+
+    float motion = g_pDetector->GetTotalMotion();
+
+    if(g_NextTime < GetCurrentTime())
+    {
+        g_NextTime = GetCurrentTime() + 1.f;
+        if(motion > 0.0005)
+        {
+            //g_Sensetivity++;
+            //g_Sensetivity = min((short)100, g_Sensetivity);
+            //g_pDetector->SetDiffrenceThreshold(g_Sensetivity);
+        }
+        else if(motion == 0.f)
+        {
+            //g_Sensetivity--;
+            //g_Sensetivity = max((short)50, g_Sensetivity);
+            //g_pDetector->SetDiffrenceThreshold(g_Sensetivity);
+        }
     }
 
     return ret;
@@ -187,7 +207,7 @@ int main()
 {
     thread thrd(SettingsThread);
 
-    CvCapture* capture = cvCaptureFromCAM( 0 );
+    CvCapture* capture = cvCaptureFromCAM( 2 );
 
     if ( !capture )
     {

@@ -131,7 +131,9 @@ void Detector::BlurMotion(motion_t* motion)
     unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
     int w = motion->size.width;
     int h = motion->size.height;
+
     int blursize = 3;
+    int blurthreshold = 1;
 
     int blur, start, end;
     XY_LOOP(w,h)
@@ -148,7 +150,7 @@ void Detector::BlurMotion(motion_t* motion)
         for(int i = start; i < end; i++)
             blur += PMOTION_XY(motion, i, y);
 
-        newmotion[x + y * w] = blur > 0; // Change to >1 to reduce noise
+        newmotion[x + y * w] = blur > blurthreshold; // Change to >1 to reduce noise
     }
     delete [] motion->motion;
     motion->motion = newmotion;
