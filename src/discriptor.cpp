@@ -77,7 +77,7 @@ CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion)
     return ret;
 }
 
-char* CBaseDescriptor::GetName(CDescriptorValue* Descriptor, int Count)
+char* CBaseDescriptor::GetName(CDescriptorValue* Descriptor)
 {
     return (char*)"Not Implemented!";
 }

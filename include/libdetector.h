@@ -129,7 +129,7 @@ namespace Detector
         CBaseDescriptor();
         ~CBaseDescriptor();
         CDescriptorValue* GetDescriptor(motion_t* Motion);
-        char* GetName(CDescriptorValue* Descriptor, int Count);
+        char* GetName(CDescriptorValue* Descriptor);
         bool LoadDescriptor(char* File); // TODO: Implent this
     private:
     };

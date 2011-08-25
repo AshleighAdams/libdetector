@@ -190,7 +190,7 @@ namespace Detector
         virtual ~IDescriptor(){};
         // Returns an array of floats to discribe an object
         virtual CDescriptorValue* GetDescriptor(motion_t* Motion) = 0;
-        virtual char* GetName(CDescriptorValue* Descriptor, int Count) = 0;
+        virtual char* GetName(CDescriptorValue* Descriptor) = 0;
     };
 }
 #endif // LIB_DET_INTERFACE_H
