@@ -228,18 +228,20 @@ bool CDetector::PushImage( CDetectorImage* pImage )
                 motion_t* movement = new motion_t;
                 movement->size.height = helper->MaxY - helper->MinY;
                 movement->size.width = helper->MaxX - helper->MinX;
-                movement->motion = new unsigned char[x * y * movement->size.width];
+                movement->motion = new unsigned char[x + y * movement->size.width];
+
+                int minx = helper->MinX;
+                int miny = helper->MinY;
 
                 for(int ly = helper->MinY; ly < helper->MaxY; ly++)
                     for(int lx = helper->MinX; lx < helper->MaxX; lx++)
                     {
                         if(PMOTION_XY(helper, lx, ly) == PIXEL_SCANNEDMOTION)
-                            PMOTION_XY(movement, lx, ly) = PIXEL_MOTION;
+                            PMOTION_XY(movement, lx - minx, ly - miny) = PIXEL_MOTION;
                     }
 
 
                 CDescriptorValue* Descriptor = m_pDescriptor->GetDescriptor(movement);
-
                 Descriptor->UnRefrence();
 
                 delete [] movement->motion;

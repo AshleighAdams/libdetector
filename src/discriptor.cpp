@@ -9,7 +9,8 @@ using namespace Detector;
 
 CDescriptorValue::CDescriptorValue()
 {
-    this->Refrence();
+    m_iRefrenceCount = 0;
+    Refrence();
 }
 
 CDescriptorValue::~CDescriptorValue()
@@ -53,6 +54,7 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
 
 CBaseDescriptor::CBaseDescriptor()
 {
+    m_iRefrenceCount = 0;
     Refrence();
 }
 
@@ -77,7 +79,7 @@ CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion)
 
 char* CBaseDescriptor::GetName(CDescriptorValue* Descriptor, int Count)
 {
-    return (char*)"Not Implented!";
+    return (char*)"Not Implemented!";
 }
 
 bool CBaseDescriptor::LoadDescriptor(char* File)
