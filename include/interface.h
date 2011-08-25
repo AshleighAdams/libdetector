@@ -148,6 +148,7 @@ namespace Detector
         ~CTrackedObject();
         targetid    ID();
         position_t  Position();
+        position_t  CenterPosition();
         velocity_t  Velocity();
         ssize_t     Size();
         double      LastSeen();
@@ -161,6 +162,7 @@ namespace Detector
         targetid    m_tiID;
         velocity_t  m_sVelocity;
         position_t  m_sPosition;
+        position_t  m_sCenterPosition;
         double      m_dblLastSeen;
     };
 

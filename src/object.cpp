@@ -37,16 +37,29 @@ position_t CTrackedObject::Position()
     return m_sPosition;
 }
 
+position_t CTrackedObject::CenterPosition()
+{
+    return m_sCenterPosition;
+}
+
 void CTrackedObject::Update(position_t& pos, ssize_t& size)
 {
-    float velx = pos.x - m_sPosition.x;
-    float vely = pos.y - m_sPosition.y;
-    m_sPosition = pos;
-    m_sVelocity.x = velx;
-    m_sVelocity.y = vely;
+    float cx = m_sCenterPosition.x, cy = m_sCenterPosition.y;
+
+    m_sPosition.x = pos.x;
+    m_sPosition.y = pos.y;
 
     m_sSize.w = size.w;
     m_sSize.h = size.h;
+
+    m_sCenterPosition.x = pos.x + size.w * 0.5f;
+    m_sCenterPosition.y = pos.y + size.h * 0.5f;
+
+    float velx = m_sCenterPosition.x - cx;
+    float vely = m_sCenterPosition.y - cy;
+
+    m_sVelocity.x = velx;
+    m_sVelocity.y = vely;
 
     m_dblLastSeen = GetCurrentTime();
 }

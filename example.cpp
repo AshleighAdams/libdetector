@@ -7,6 +7,7 @@
 #include <string.h>
 #include <vector>
 #include <list>
+#include <cmath>
 
 // OpenCV includes
 using namespace std; // OpenCV needs this else we get 500 errors....
@@ -19,14 +20,77 @@ using namespace std; // OpenCV needs this else we get 500 errors....
 
 using namespace Detector;
 
+const int TrailLength = 40;
+
+struct ObjectTrail
+{
+    int count;
+    int current_position;
+    position_t* positions;
+};
+
+ObjectTrail* Trails[1024];
+
 void NewObject(CTrackedObject* Obj)
 {
     cout << "Tracking new object! @ " << GetCurrentTime() << "\n";
+    int idx = Obj->ID() % 1024;
+
+    ObjectTrail* Trail = new ObjectTrail;
+    Trail->count = 0;
+    Trail->current_position = 0;
+    Trail->positions = new position_t[TrailLength];
+
+    Trails[idx] = Trail;
 }
 
 void LastObject(CTrackedObject* Obj)
 {
     cout << "Lost object! @ " << GetCurrentTime() << "\n";
+    int idx = Obj->ID() % 1024;
+    delete [] Trails[idx]->positions;
+    delete Trails[idx];
+}
+
+void Update(CTrackedObject* Obj, bool Simulated)
+{
+    int idx = Obj->ID() % 1024;
+    ObjectTrail* Trail = Trails[idx];
+
+    position_t pos = Obj->CenterPosition();
+
+    Trail->positions[Trail->current_position].x = pos.x;
+    Trail->positions[Trail->current_position].y = pos.y;
+
+    Trail->current_position = (Trail->current_position + 1) % TrailLength;
+    Trail->count = min(TrailLength, Trail->count + 1);
+}
+
+void DrawTrails(CDetectorImage* Img, CTrackedObject* Obj)
+{
+    int idx = Obj->ID() % 1024;
+    ObjectTrail* Trail = Trails[idx];
+    if(Trail->count <= 1) return;
+
+    position_t last;
+    int start = Trail->current_position;
+    int i = start;
+    bool doneone = false;
+    while(true)
+    {
+        if(start == i && doneone) break;
+        if(i >= Trail->count) i = 0;
+        if(start == i && doneone) break;
+
+        position_t pos = Trail->positions[i];
+
+        if(doneone)
+            Img->DrawLine(pos, last);
+
+        doneone = true;
+        last = pos;
+        i++;
+    }
 }
 
 CDetector* g_pDetector = NULL;
@@ -73,13 +137,14 @@ bool ProccessFrame(CDetectorImage* Image)
     if(!g_pDetector && !g_pTracker)
     {
         g_pDetector = new CDetector(Image->GetSize());
-
+        g_pDetector->SetDiffrenceThreshold(65.f);
         //CBaseDescriptor* Disc = new CBaseDescriptor();
         //g_pDetector->SetDescriptor(Disc);
 
         g_pTracker = new CObjectTracker();
-        g_pTracker->SetEvent(EVENT_NEWTARG,    (void*)&NewObject);
-        g_pTracker->SetEvent(EVENT_LOST,       (void*)&LastObject);
+        g_pTracker->SetEvent(EVENT_NEWTARG,     (void*)&NewObject);
+        g_pTracker->SetEvent(EVENT_LOST,        (void*)&LastObject);
+        g_pTracker->SetEvent(EVENT_UPDATE,      (void*)&Update);
     }
     g_pDetector->PushImage(Image);
     g_Count = g_pDetector->GetTargets(g_Targets);
@@ -110,16 +175,8 @@ bool ProccessFrame(CDetectorImage* Image)
     {
         ret = true;
         Image->DrawTarget(Obj);
-        //DrawTarget(Image, Obj);
+        DrawTrails(Image, Obj);
     }
-
-    position_t a;
-    position_t b;
-    a.x = 0.1;
-    a.y = 0.1;
-    b.x = 0.9;
-    b.y = 0.9;
-    Image->DrawLine(a,b);
 
     return ret;
 }
