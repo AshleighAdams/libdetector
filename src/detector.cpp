@@ -241,8 +241,10 @@ bool CDetector::PushImage( CDetectorImage* pImage )
                     }
 
                 CDescriptorValue* Descriptor = m_pDescriptor->GetDescriptor(movement);
-                Descriptor->UnRefrence();
+                char* type = m_pDescriptor->GetName(Descriptor);
+                std::cout << type << "\n";
 
+                Descriptor->UnRefrence();
                 delete [] movement->motion;
                 delete movement;
             }

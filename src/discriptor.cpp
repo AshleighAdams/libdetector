@@ -6,6 +6,7 @@
 #define DETECTOR_INTERNAL
 #include "../include/libdetector.h"
 using namespace Detector;
+using namespace std;
 
 CDescriptorValue::CDescriptorValue()
 {
@@ -39,14 +40,14 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
     if(inc < 1) inc = 1;
     total           = 360 / inc; // Find out how many
 
-    int rads;
-    for(int i = 0; i < 360; i+=inc)
+    float rads;
+    for(int i = 0; i < 360; i += inc)
     {
         rads = M_PI / 180.f * (float)i;
         x = (cos(rads) * flScaleX) + center_x;
         y = (sin(rads) * flScaleY) + center_y;
 
-        if(PMOTION_XY(Motion, x, y) == PIXEL_SCANNEDMOTION)
+        if(PMOTION_XY(Motion, x, y) == PIXEL_MOTION)
             motioncount++;
     }
     return (float)motioncount / (float)total;
@@ -72,18 +73,60 @@ CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion)
     ret->g_Values[1] = GetRingDensity(Motion, 0.5f);
     ret->g_Values[2] = GetRingDensity(Motion, 0.75f);
 
-    PRINT(ret->g_Values[0] << " :: " << ret->g_Values[1] << " :: " << ret->g_Values[2] << "\n");
+    //PRINT(ret->g_Values[0] << " :: " << ret->g_Values[1] << " :: " << ret->g_Values[2] << "\n");
 
     return ret;
 }
 
+struct Discriptors
+{
+    float a;
+    float b;
+    float c;
+    char* name;
+};
+
+Discriptors Loaded[10];
+int LoadedCount = 0;
+
 char* CBaseDescriptor::GetName(CDescriptorValue* Descriptor)
 {
-    return (char*)"Not Implemented!";
+    float flMaxDiff;
+    float flThreshold = 0.06f;
+
+    float   flSmallestScore = 999.f;
+    int     SmallestScorer = -1;
+
+    for(int i = 0; i < LoadedCount; i++)
+    {
+        flMaxDiff = 0.f;
+
+        flMaxDiff = max(flMaxDiff, abs(Descriptor->g_Values[0] - Loaded[i].a));
+        flMaxDiff = max(flMaxDiff, abs(Descriptor->g_Values[1] - Loaded[i].b));
+        flMaxDiff = max(flMaxDiff, abs(Descriptor->g_Values[2] - Loaded[i].c));
+
+        if(flMaxDiff < flSmallestScore)
+        {
+            flSmallestScore = flMaxDiff;
+            SmallestScorer = i;
+        }
+    }
+
+    cout << flSmallestScore << "\n";
+
+    if(SmallestScorer < 0 || flSmallestScore > flThreshold) return "Unknown";
+    return Loaded[SmallestScorer].name;
 }
 
 bool CBaseDescriptor::LoadDescriptor(char* File)
 {
+    Loaded[0].a = 1.f;
+    Loaded[0].b = 1.f;
+    Loaded[0].c = 1.f;
+    Loaded[0].name = "Circle";
+
+    LoadedCount++;
+
     return false;
 }
 

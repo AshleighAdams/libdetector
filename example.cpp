@@ -142,6 +142,7 @@ bool ProccessFrame(CDetectorImage* Image)
         g_pDetector->SetDiffrenceThreshold(65.f);
 
         CBaseDescriptor* Disc = new CBaseDescriptor();
+        Disc->LoadDescriptor("");
         g_pDetector->SetDescriptor(Disc);
         Disc->UnRefrence();
 

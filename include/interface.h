@@ -97,7 +97,7 @@ namespace Detector
         float y;
         float width;
         float height;
-        unsigned char motion[];
+        char* type;
     };
 
     class IDetector : public CDetectorBaseClass
