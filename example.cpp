@@ -140,8 +140,10 @@ bool ProccessFrame(CDetectorImage* Image)
     {
         g_pDetector = new CDetector(Image->GetSize());
         g_pDetector->SetDiffrenceThreshold(65.f);
-        //CBaseDescriptor* Disc = new CBaseDescriptor();
-        //g_pDetector->SetDescriptor(Disc);
+
+        CBaseDescriptor* Disc = new CBaseDescriptor();
+        g_pDetector->SetDescriptor(Disc);
+        Disc->UnRefrence();
 
         g_pTracker = new CObjectTracker();
         g_pTracker->SetEvent(EVENT_NEWTARG,     (void*)&NewObject);
@@ -207,7 +209,7 @@ int main()
 {
     thread thrd(SettingsThread);
 
-    CvCapture* capture = cvCaptureFromCAM( 2 );
+    CvCapture* capture = cvCaptureFromCAM( 1 );
 
     if ( !capture )
     {

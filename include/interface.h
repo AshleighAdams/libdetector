@@ -178,7 +178,7 @@ namespace Detector
     class CDescriptorValue : public CDetectorBaseClass
     {
     public:
-        CDescriptorValue(){ m_iRefrenceCount = 1; }
+        CDescriptorValue();
         ~CDescriptorValue();
         int g_Count;
         float* g_Values;
@@ -187,6 +187,7 @@ namespace Detector
     class IDescriptor : public CDetectorBaseClass
     {
     public:
+        virtual ~IDescriptor(){};
         // Returns an array of floats to discribe an object
         virtual CDescriptorValue* GetDescriptor(motion_t* Motion) = 0;
         virtual char* GetName(CDescriptorValue* Descriptor, int Count) = 0;

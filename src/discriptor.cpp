@@ -7,6 +7,11 @@
 #include "../include/libdetector.h"
 using namespace Detector;
 
+CDescriptorValue::CDescriptorValue()
+{
+    this->Refrence();
+}
+
 CDescriptorValue::~CDescriptorValue()
 {
     delete [] g_Values;
@@ -44,6 +49,15 @@ float GetRingDensity(motion_t* Motion, float flSizePercent)
             motioncount++;
     }
     return (float)motioncount / (float)total;
+}
+
+CBaseDescriptor::CBaseDescriptor()
+{
+    Refrence();
+}
+
+CBaseDescriptor::~CBaseDescriptor()
+{
 }
 
 CDescriptorValue* CBaseDescriptor::GetDescriptor(motion_t* Motion)

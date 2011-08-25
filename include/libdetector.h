@@ -126,6 +126,8 @@ namespace Detector
     class CBaseDescriptor : public IDescriptor
     {
     public:
+        CBaseDescriptor();
+        ~CBaseDescriptor();
         CDescriptorValue* GetDescriptor(motion_t* Motion);
         char* GetName(CDescriptorValue* Descriptor, int Count);
         bool LoadDescriptor(char* File); // TODO: Implent this
