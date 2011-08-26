@@ -175,22 +175,12 @@ namespace Detector
         virtual TrackedObjects* GetTrackedObjects() = 0;
     };
 
-    class CDescriptorValue : public CDetectorBaseClass
-    {
-    public:
-        CDescriptorValue();
-        ~CDescriptorValue();
-        int g_Count;
-        float* g_Values;
-    };
-
     class IDescriptor : public CDetectorBaseClass
     {
     public:
         virtual ~IDescriptor(){};
         // Returns an array of floats to discribe an object
-        virtual CDescriptorValue* GetDescriptor(motion_t* Motion) = 0;
-        virtual char* GetName(CDescriptorValue* Descriptor) = 0;
+        virtual char* GetDescriptor(motion_t* Motion) = 0;
     };
 }
 #endif // LIB_DET_INTERFACE_H
