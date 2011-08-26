@@ -18,6 +18,22 @@ CBaseDescriptor::~CBaseDescriptor()
 {
 }
 
+float Q_sqrt( float number ) // Thanks whoever made this (this implentation is from Quake III Arena)
+{
+    long i;
+    float x, y;
+    const float f = 1.5F;
+
+    x = number * 0.5F;
+    y  = number;
+    i  = * ( long * ) &y;
+    i  = 0x5f3759df - ( i >> 1 );
+    y  = * ( float * ) &i;
+    y  = y * ( f - ( x * y * y ) );
+    y  = y * ( f - ( x * y * y ) );
+    return number * y;
+}
+
 int GetDistance(motion_t* Motion, int Angle, int startx, int starty)
 {
     float rads = (360.f / 180.f) * M_PI;
@@ -41,11 +57,11 @@ int GetDistance(motion_t* Motion, int Angle, int startx, int starty)
     int count = 0;
     while(true)
     {
-        count++;
         if(x0 == x1 && y0 == y1) break;
-
         if(x0 < 0 || x0 > Motion->size.width) break;
         if(y0 < 0 || y0 > Motion->size.height) break;
+
+        count++;
 
         e2 = 2 * err;
         if(e2 > -dy)
@@ -59,6 +75,11 @@ int GetDistance(motion_t* Motion, int Angle, int startx, int starty)
             y0 += sy;
         }
     }
+
+    float xx = abs(startx - x0);
+    float yy = abs(starty - y0);
+
+    return (int)Q_sqrt(xx * xx + yy * yy);
 }
 
 char* CBaseDescriptor::GetDescriptor(motion_t* Motion)
