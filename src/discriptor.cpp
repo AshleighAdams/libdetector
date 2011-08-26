@@ -8,17 +8,6 @@
 using namespace Detector;
 using namespace std;
 
-CDescriptorValue::CDescriptorValue()
-{
-    m_iRefrenceCount = 0;
-    Refrence();
-}
-
-CDescriptorValue::~CDescriptorValue()
-{
-}
-
-
 CBaseDescriptor::CBaseDescriptor()
 {
     m_iRefrenceCount = 0;
@@ -31,10 +20,16 @@ CBaseDescriptor::~CBaseDescriptor()
 
 int GetDistance(motion_t* Motion, int Angle, int startx, int starty)
 {
-    int     x0 = a.x * m_sSize.width,
-            y0 = a.y * m_sSize.height,
-            x1 = b.x * m_sSize.width,
-            y1 = b.y * m_sSize.height;
+    float rads = (360.f / 180.f) * M_PI;
+    float xdir = cos(rads);
+    float ydir = sin(rads);
+
+
+
+    int     x0 = startx,
+            y0 = starty,
+            x1 = startx + 100.f * xdir, // TODO: Fix 100.f for guess size
+            y1 = starty + 100.f * ydir;
     int dx = abs(x1 - x0);
     int dy = abs(y1 - y0);
 
@@ -43,10 +38,15 @@ int GetDistance(motion_t* Motion, int Angle, int startx, int starty)
 
     int err = dx - dy;
     int e2;
+    int count = 0;
     while(true)
     {
-        SETPIX(x0,y0);
+        count++;
         if(x0 == x1 && y0 == y1) break;
+
+        if(x0 < 0 || x0 > Motion->size.width) break;
+        if(y0 < 0 || y0 > Motion->size.height) break;
+
         e2 = 2 * err;
         if(e2 > -dy)
         {
@@ -67,13 +67,15 @@ char* CBaseDescriptor::GetDescriptor(motion_t* Motion)
     int LongestDistance = 0;
     unsigned int RealDistances[360-1];
 
+    int sx = Motion->size.width / 2, sy = Motion->size.width / 2;
+
     int distance;
     for(int i = 0; i < 360; i++)
     {
-        distance = GetDistance(Motion, i);
+        distance = GetDistance(Motion, i, sx, sy);
     }
 
-    return ret;
+    return "";
 }
 
 bool CBaseDescriptor::LoadDescriptor(CDetectorImage* pImage)

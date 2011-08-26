@@ -240,10 +240,8 @@ bool CDetector::PushImage( CDetectorImage* pImage )
                             PMOTION_XY(movement, lx - minx, ly - miny) = PIXEL_MOTION;
                     }
 
-                CDescriptorValue* Descriptor = m_pDescriptor->GetDescriptor(movement);
-                char* type = m_pDescriptor->GetName(Descriptor);
-                std::cout << type << "\n";
-                Descriptor->UnRefrence();
+                // TODO: Discriptor Stuff
+
                 delete [] movement->motion;
                 delete movement;
             }

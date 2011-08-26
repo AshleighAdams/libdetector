@@ -136,7 +136,7 @@ namespace Detector
         ~CBaseDescriptor();
         char* GetDescriptor(motion_t* Motion);
         bool LoadDescriptor(CDetectorImage* pImage); // TODO: Implent this
-        histrogram_t        m_Histogram; // Just for debugging...
+        histogram_t         m_Histogram; // Just for debugging...
     private:
 
     };
