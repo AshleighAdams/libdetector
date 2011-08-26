@@ -187,20 +187,3 @@ void S_BlurMotion(motion_t* motion)
     motion->motion = newmotion;
 }
 
-pixel_t* _pix;
-void inline SetPixelRed(CDetectorImage* Img, int x, int y)
-{
-    _pix = Img->Pixel(x,y);
-    _pix->r = 255;
-    _pix->g = 0;
-    _pix->b = 0;
-}
-void inline SetPixelGreen(CDetectorImage* Img, int x, int y)
-{
-    _pix = Img->Pixel(x,y);
-    _pix->r = 0;
-    _pix->g = 255;
-    _pix->b = 0;
-}
-
-
