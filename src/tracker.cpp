@@ -9,23 +9,6 @@
 using namespace Detector;
 
 
-// Stuff that's usefull to the tracker
-float Q_sqrt( float number ) // Thanks whoever made this (this implentation is from Quake III Arena)
-{
-    long i;
-    float x, y;
-    const float f = 1.5F;
-
-    x = number * 0.5F;
-    y  = number;
-    i  = * ( long * ) &y;
-    i  = 0x5f3759df - ( i >> 1 );
-    y  = * ( float * ) &i;
-    y  = y * ( f - ( x * y * y ) );
-    y  = y * ( f - ( x * y * y ) );
-    return number * y;
-}
-
 float Detector::Distance(position_t& a, position_t& b)
 {
     float x = std::abs(a.x - b.x);

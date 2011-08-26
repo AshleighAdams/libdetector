@@ -134,6 +134,8 @@ void SettingsThread()
 target_t* g_Targets[MAX_TARGETS];
 int g_Count = 0;
 
+CBaseDescriptor* g_pDesc;
+
 bool ProccessFrame(CDetectorImage* Image)
 {
     if(!g_pDetector && !g_pTracker)
@@ -141,10 +143,10 @@ bool ProccessFrame(CDetectorImage* Image)
         g_pDetector = new CDetector(Image->GetSize());
         g_pDetector->SetDiffrenceThreshold(65.f);
 
-        //CBaseDescriptor* Disc = new CBaseDescriptor();
+        g_pDesc = new CBaseDescriptor();
         //Disc->LoadDescriptor("");
-        //g_pDetector->SetDescriptor(Disc);
-        //Disc->UnRefrence();
+        g_pDetector->SetDescriptor(g_pDesc);
+
 
         g_pTracker = new CObjectTracker();
         g_pTracker->SetEvent(EVENT_NEWTARG,     (void*)&NewObject);
@@ -160,6 +162,7 @@ bool ProccessFrame(CDetectorImage* Image)
 
     color_t NoneTrackedCol;
     color_t TrackedCol;
+    color_t HistoCol;
 
     NoneTrackedCol.r = 255;
     NoneTrackedCol.g = 0;
@@ -168,6 +171,10 @@ bool ProccessFrame(CDetectorImage* Image)
     TrackedCol.r = 0;
     TrackedCol.g = 255;
     TrackedCol.b = 0;
+
+    HistoCol.r = 0;
+    HistoCol.g = 0;
+    HistoCol.b = 255;
 
     Image->DrawColor(NoneTrackedCol);
     for(int i = 0; i < g_Count; i++)
@@ -201,6 +208,27 @@ bool ProccessFrame(CDetectorImage* Image)
         }
     }
 
+    Image->DrawColor(HistoCol);
+
+    if(g_pDetector->GetNumberOfTargets() > 0)
+    {
+        position_t pos1;
+        position_t pos2;
+
+        for(int i = 0; i < 360; i++)
+        {
+            pos1.x = (float)i / 360.f;
+            pos1.y = 0.f;
+            if(i > 0)
+            {
+                cout << g_pDesc->m_Histogram.values[i] << "\n";
+                pos1.y = 1.f - g_pDesc->m_Histogram.values[i];
+                Image->DrawLine(pos1, pos2);
+            }
+            pos2.x = pos1.x;
+            pos2.y = pos1.y;
+        }
+    }
     return ret;
 }
 

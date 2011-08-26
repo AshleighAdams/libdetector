@@ -127,6 +127,8 @@ namespace Detector
     void MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount, float flMaxChange);
     // Used to blur the motion image (so it can find bounds much better)
     void BlurMotion(motion_t* Motion);
+    // Fast
+    float Q_sqrt( float number );
 
     struct ssize_t
     {

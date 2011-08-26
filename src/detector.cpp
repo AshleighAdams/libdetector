@@ -241,6 +241,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
                     }
 
                 // TODO: Discriptor Stuff
+                m_pDescriptor->GetDescriptor(movement);
 
                 delete [] movement->motion;
                 delete movement;
