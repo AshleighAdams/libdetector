@@ -34,7 +34,7 @@ float Q_sqrt( float number ) // Thanks whoever made this (this implentation is f
     return number * y;
 }
 
-int GetDistance(motion_t* Motion, int Angle, int startx, int starty)
+float GetDistance(motion_t* Motion, int Angle, int startx, int starty)
 {
     float rads = (360.f / 180.f) * M_PI;
     float xdir = cos(rads);
@@ -61,6 +61,8 @@ int GetDistance(motion_t* Motion, int Angle, int startx, int starty)
         if(x0 < 0 || x0 > Motion->size.width) break;
         if(y0 < 0 || y0 > Motion->size.height) break;
 
+        if(PMOTION_XY(Motion, x0, y0) != PIXEL_MOTION) break;
+
         count++;
 
         e2 = 2 * err;
@@ -79,22 +81,33 @@ int GetDistance(motion_t* Motion, int Angle, int startx, int starty)
     float xx = abs(startx - x0);
     float yy = abs(starty - y0);
 
-    return (int)Q_sqrt(xx * xx + yy * yy);
+    return Q_sqrt(xx * xx + yy * yy);
 }
 
 char* CBaseDescriptor::GetDescriptor(motion_t* Motion)
 {
     int LongestPos = 0;
-    int LongestDistance = 0;
-    unsigned int RealDistances[360-1];
+    float flLongestDistance = 0;
+    float RealDistances[360-1];
 
     int sx = Motion->size.width / 2, sy = Motion->size.width / 2;
 
-    int distance;
+    float distance;
     for(int i = 0; i < 360; i++)
     {
         distance = GetDistance(Motion, i, sx, sy);
+        RealDistances[i] = distance;
+        if(distance > flLongestDistance)
+        {
+            flLongestDistance = distance;
+            LongestPos = i;
+        }
     }
+
+    for(int i = 0; i < 360; i++)
+        m_Histogram.values[i] = RealDistances[i] / flLongestDistance;
+
+    m_Histogram.highestvalue = LongestPos;
 
     return "";
 }
