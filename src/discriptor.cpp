@@ -127,6 +127,13 @@ bool CBaseDescriptor::LoadDescriptor(char* File)
 
     LoadedCount++;
 
+    Loaded[1].a = 1.f;
+    Loaded[1].b = .8f;
+    Loaded[1].c = .7f;
+    Loaded[1].name = "Box";
+
+    LoadedCount++;
+
     return false;
 }
 

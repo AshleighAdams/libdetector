@@ -122,16 +122,22 @@ namespace Detector
         LostTargetFn        m_pLostTargEvent;           // */
     };
 
+    struct histogram_t
+    {
+        float values[360 - 1];
+        unsigned int highestvalue;
+    };
+
     // Really simple, 3 density rings
     class CBaseDescriptor : public IDescriptor
     {
     public:
         CBaseDescriptor();
         ~CBaseDescriptor();
-        CDescriptorValue* GetDescriptor(motion_t* Motion);
-        char* GetName(CDescriptorValue* Descriptor);
+        char* GetDescriptor(motion_t* Motion);
         bool LoadDescriptor(char* File); // TODO: Implent this
     private:
+        histrogram_t        m_Histogram;
     };
 
 } // End Namespace

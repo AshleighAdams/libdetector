@@ -141,10 +141,10 @@ bool ProccessFrame(CDetectorImage* Image)
         g_pDetector = new CDetector(Image->GetSize());
         g_pDetector->SetDiffrenceThreshold(65.f);
 
-        CBaseDescriptor* Disc = new CBaseDescriptor();
-        Disc->LoadDescriptor("");
-        g_pDetector->SetDescriptor(Disc);
-        Disc->UnRefrence();
+        //CBaseDescriptor* Disc = new CBaseDescriptor();
+        //Disc->LoadDescriptor("");
+        //g_pDetector->SetDescriptor(Disc);
+        //Disc->UnRefrence();
 
         g_pTracker = new CObjectTracker();
         g_pTracker->SetEvent(EVENT_NEWTARG,     (void*)&NewObject);
