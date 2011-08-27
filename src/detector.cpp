@@ -16,7 +16,7 @@ unsigned char DiffrenceBetween( unsigned char a, unsigned char b )
 
 void Detector::AbsoluteDiffrence( CDetector* self, CDetectorImage* img1, CDetectorImage* img2, motion_t* Target )
 {
-    int w, h;
+	int w, h;
 	w = Target->size.width;
 	h = Target->size.height;
 
@@ -145,12 +145,12 @@ CDetector::CDetector( imagesize_t Size )
 	m_flMinTargSize = .05f;
 	for( int i = 0; i < MAX_TARGETS; i++ )
 		m_pTargets[i] = NULL;
-    m_pDescriptor = NULL;
-    m_flBlurAmmount = .1f;
-    m_flBlurMaxChange = 1.f;
-    m_BlurUpdateRate = 10; // So we can slow the update rate of the background image
-    m_BlurUpdateRateFrame = 0;
-    m_flTotalMotion = 0.f;
+	m_pDescriptor = NULL;
+	m_flBlurAmmount = .1f;
+	m_flBlurMaxChange = 1.f;
+	m_BlurUpdateRate = 10; // So we can slow the update rate of the background image
+	m_BlurUpdateRateFrame = 0;
+	m_flTotalMotion = 0.f;
 
 }
 
@@ -158,12 +158,12 @@ CDetector::~CDetector()
 {
 	m_pRefrenceImage->UnRefrence();
 	m_pDescriptor->UnRefrence();
-    m_pIgnoreMotionImage->UnRefrence();
+	m_pIgnoreMotionImage->UnRefrence();
 
 	delete [] m_pMotionImage->motion;
-    delete m_pMotionImage;
+	delete m_pMotionImage;
 
-    // Make sure all the targets are deleted
+	// Make sure all the targets are deleted
 	for( int i = 0; i < MAX_TARGETS; i++ )
 	{
 		if( m_pTargets[i] )
@@ -174,20 +174,20 @@ CDetector::~CDetector()
 
 void CDetector::SetDescriptor(IDescriptor* Descriptor)
 {
-    if(m_pDescriptor)
-        m_pDescriptor->UnRefrence();
+	if(m_pDescriptor)
+		m_pDescriptor->UnRefrence();
 
-    m_pDescriptor = Descriptor;
+	m_pDescriptor = Descriptor;
 
-    if(m_pDescriptor) // Déjà vu (almost)
-        m_pDescriptor->Refrence();
+	if(m_pDescriptor) // Déjà vu (almost)
+		m_pDescriptor->Refrence();
 }
 
 bool CDetector::PushImage( CDetectorImage* pImage )
 {
 	if( !imagesize_tEqual( pImage->GetSize(), m_sSize ) )
 		return false;
-    m_iFalsePos = 0;
+	m_iFalsePos = 0;
 	pImage->Refrence();
 	if( !m_pRefrenceImage )
 	{
@@ -223,29 +223,29 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 			targ->width = ( float )( helper->MaxX - helper->MinX ) / ( float )w;
 			targ->height = ( float )( helper->MaxY - helper->MinY ) / ( float )h;
 
-            if( m_pDescriptor && (targ->height + targ->width) > m_flMinTargSize )
-            {
-                motion_t* movement = new motion_t;
-                movement->size.height = helper->MaxY - helper->MinY;
-                movement->size.width = helper->MaxX - helper->MinX;
-                movement->motion = new unsigned char[movement->size.width + movement->size.height * movement->size.width];
+			if( m_pDescriptor && (targ->height + targ->width) > m_flMinTargSize )
+			{
+				motion_t* movement = new motion_t;
+				movement->size.height = helper->MaxY - helper->MinY;
+				movement->size.width = helper->MaxX - helper->MinX;
+				movement->motion = new unsigned char[movement->size.width + movement->size.height * movement->size.width];
 
-                int minx = helper->MinX;
-                int miny = helper->MinY;
+				int minx = helper->MinX;
+				int miny = helper->MinY;
 
-                for(int ly = helper->MinY; ly < helper->MaxY; ly++)
-                    for(int lx = helper->MinX; lx < helper->MaxX; lx++)
-                    {
-                        if(PMOTION_XY(helper, lx, ly) == PIXEL_SCANNEDMOTION)
-                            PMOTION_XY(movement, lx - minx, ly - miny) = PIXEL_MOTION;
-                    }
+				for(int ly = helper->MinY; ly < helper->MaxY; ly++)
+					for(int lx = helper->MinX; lx < helper->MaxX; lx++)
+					{
+						if(PMOTION_XY(helper, lx, ly) == PIXEL_SCANNEDMOTION)
+							PMOTION_XY(movement, lx - minx, ly - miny) = PIXEL_MOTION;
+					}
 
-                // TODO: Discriptor Stuff
-                m_pDescriptor->GetDescriptor(movement);
+				// TODO: Discriptor Stuff
+				m_pDescriptor->GetDescriptor(movement);
 
-                delete [] movement->motion;
-                delete movement;
-            }
+				delete [] movement->motion;
+				delete movement;
+			}
 
 			delete helper;
 
@@ -266,33 +266,33 @@ EndLoop:
 
 	m_iTargets = count;
 
-    int MaxSetPixels = m_sSize.width + m_sSize.height * m_sSize.width;
-    int SetPixels = 0;
+	int MaxSetPixels = m_sSize.width + m_sSize.height * m_sSize.width;
+	int SetPixels = 0;
 
-    XY_LOOP(m_sSize.width, m_sSize.height)
-        if(PMOTION_XY(m_pMotionImage, x,y) > 0) SetPixels++;
+	XY_LOOP(m_sSize.width, m_sSize.height)
+		if(PMOTION_XY(m_pMotionImage, x,y) > 0) SetPixels++;
 
-    m_flTotalMotion = (float)SetPixels / (float)MaxSetPixels;
+	m_flTotalMotion = (float)SetPixels / (float)MaxSetPixels;
 
-    if(m_bCleverBackground) // Not implented yet
-    {
-        if(m_iFalsePos > 5);
-        {
-            // this will be a per pixel update, no blur, all manual
-            MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
-        }
-    }else
-    {
-        m_BlurUpdateRateFrame++;
-        if(m_BlurUpdateRateFrame == m_BlurUpdateRate)
-        {
-            MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
-            m_BlurUpdateRateFrame = 0;
-        }else if(m_flTotalMotion > 0.5f)
-        {
-            MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, 999.f);
-        }
-    }
+	if(m_bCleverBackground) // Not implented yet
+	{
+		if(m_iFalsePos > 5);
+		{
+			// this will be a per pixel update, no blur, all manual
+			MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
+		}
+	}else
+	{
+		m_BlurUpdateRateFrame++;
+		if(m_BlurUpdateRateFrame == m_BlurUpdateRate)
+		{
+			MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
+			m_BlurUpdateRateFrame = 0;
+		}else if(m_flTotalMotion > 0.5f)
+		{
+			MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, 999.f);
+		}
+	}
 
 	//m_pRefrenceImage->UnRefrence();
 	//m_pRefrenceImage = pImage->Exclusive();
@@ -303,7 +303,7 @@ EndLoop:
 
 void CDetector::SetMotionBlur(float flAmmount)
 {
-    m_flBlurAmmount = flAmmount;
+	m_flBlurAmmount = flAmmount;
 }
 
 int CDetector::GetTargets( target_t* Targets[MAX_TARGETS] )
@@ -333,41 +333,27 @@ void CDetector::SetMinTargSize( float flAmmount )
 
 unsigned int CDetector::GetFalsePosCount()
 {
-    return m_iFalsePos;
+	return m_iFalsePos;
 }
 
 float CDetector::GetTotalMotion()
 {
-    return m_flTotalMotion;
+	return m_flTotalMotion;
 }
 
 motion_t* CDetector::GetMotionImage()
 {
-    return m_pMotionImage;
+	return m_pMotionImage;
 }
 
 void CDetector::SetIgnoreImage(CDetectorImage* pImage)
 {
-    if(m_pIgnoreMotionImage)
-        m_pIgnoreMotionImage->UnRefrence();
+	if(m_pIgnoreMotionImage)
+		m_pIgnoreMotionImage->UnRefrence();
 
-    m_pIgnoreMotionImage = pImage; // TODO: Debating whether to use Exclusive (people can change after it's been set, eg, draw on it
+	m_pIgnoreMotionImage = pImage; // TODO: Debating whether to use Exclusive (people can change after it's been set, eg, draw on it
 
-    if(m_pIgnoreMotionImage)
-        m_pIgnoreMotionImage->Refrence();
+	if(m_pIgnoreMotionImage)
+		m_pIgnoreMotionImage->Refrence();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

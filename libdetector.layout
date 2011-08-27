@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Release" />
-	<File name="src/detector.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="0" topLine="0" />
+	<File name="include/libdetector.h" open="1" top="1" tabpos="5">
+		<Cursor position="878" topLine="15" />
+	</File>
+	<File name="src/detector.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="8695" topLine="325" />
+	</File>
+	<File name="src/image.cpp" open="1" top="0" tabpos="4">
+		<Cursor position="0" topLine="15" />
 	</File>
 	<File name="src/util.cpp" open="1" top="0" tabpos="2">
 		<Cursor position="3686" topLine="123" />

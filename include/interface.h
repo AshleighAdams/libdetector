@@ -26,8 +26,8 @@
 #define XY_LOOP(_w_,_h_) for(int y = 0; y < _h_; y++) for(int x = 0; x < _w_; x++)
 
 #define XY_LOOP_START(_x_,_y_,_endx_,_endy_) \
-    for(int y = _y_; y < _endy_; y++)\
-    for(int x = _x_; x < _endx_; x++)
+	for(int y = _y_; y < _endy_; y++)\
+	for(int x = _x_; x < _endx_; x++)
 
 #define PRINT(_X_) std::cout << _X_ << '\n'
 
@@ -37,152 +37,152 @@ unsigned char DiffrenceBetween( unsigned char a, unsigned char b );
 
 namespace Detector
 {
-    class CDetectorImage;
+	class CDetectorImage;
 
-    struct imagesize_t
-    {
-        int width;
-        int height;
-    };
+	struct imagesize_t
+	{
+		int width;
+		int height;
+	};
 
-    bool imagesize_tEqual( imagesize_t a, imagesize_t b );
+	bool imagesize_tEqual( imagesize_t a, imagesize_t b );
 
-    // Provides a byte for each pixel
-    struct motion_t
-    {
-        imagesize_t size;
-        unsigned char* motion;
-    };
+	// Provides a byte for each pixel
+	struct motion_t
+	{
+		imagesize_t size;
+		unsigned char* motion;
+	};
 
-    struct motionhelper_t
-    {
-        imagesize_t size;
-        int MinX;
-        int MinY;
-        int MaxX;
-        int MaxY;
-        unsigned char* motion;
-    };
+	struct motionhelper_t
+	{
+		imagesize_t size;
+		int MinX;
+		int MinY;
+		int MaxX;
+		int MaxY;
+		unsigned char* motion;
+	};
 
-    struct pixel_t
-    {
-        unsigned char r;
-        unsigned char g;
-        unsigned char b;
-    };
+	struct pixel_t
+	{
+		unsigned char r;
+		unsigned char g;
+		unsigned char b;
+	};
 
-    typedef pixel_t color_t; // Whatever makes sense to you
+	typedef pixel_t color_t; // Whatever makes sense to you
 
-    class CDetectorBaseClass
-    {
-    public:
-        virtual ~CDetectorBaseClass() {}; // GARH, this is so our real destructor is called!
-        void Refrence( void )
-        {
-            m_iRefrenceCount++;
-        };
-        void UnRefrence( void )
-        {
-            m_iRefrenceCount--;
-            if( m_iRefrenceCount == 0 )
-                delete this;
-        };
-    protected:
-        int m_iRefrenceCount;
-    };
+	class CDetectorBaseClass
+	{
+	public:
+		virtual ~CDetectorBaseClass() {}; // GARH, this is so our real destructor is called!
+		void Refrence( void )
+		{
+			m_iRefrenceCount++;
+		};
+		void UnRefrence( void )
+		{
+			m_iRefrenceCount--;
+			if( m_iRefrenceCount == 0 )
+				delete this;
+		};
+	protected:
+		int m_iRefrenceCount;
+	};
 
-    struct target_t
-    {
-        float x;
-        float y;
-        float width;
-        float height;
-        char* type;
-    };
+	struct target_t
+	{
+		float x;
+		float y;
+		float width;
+		float height;
+		char* type;
+	};
 
-    class IDetector : public CDetectorBaseClass
-    {
-    public:
-        // Push the next image here, calculates the new target
-        virtual bool PushImage( CDetectorImage* Image ) = 0;
-        // Returns the number of targets, outputs to argument
-        virtual int GetTargets( target_t* Targets[MAX_TARGETS] ) = 0;
-    };
+	class IDetector : public CDetectorBaseClass
+	{
+	public:
+		// Push the next image here, calculates the new target
+		virtual bool PushImage( CDetectorImage* Image ) = 0;
+		// Returns the number of targets, outputs to argument
+		virtual int GetTargets( target_t* Targets[MAX_TARGETS] ) = 0;
+	};
 
-    struct velocity_t
-    {
-        float x;
-        float y;
-    };
+	struct velocity_t
+	{
+		float x;
+		float y;
+	};
 
-    struct position_t
-    {
-        float x;
-        float y;
-    };
+	struct position_t
+	{
+		float x;
+		float y;
+	};
 
-    // Distance between 2 targets
-    float Distance(position_t &a, position_t &b);
-    // Used to motionblur the refrence image over time
-    void MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount, float flMaxChange);
-    // Used to blur the motion image (so it can find bounds much better)
-    void BlurMotion(motion_t* Motion);
-    // Fast
-    float Q_sqrt( float number );
+	// Distance between 2 targets
+	float Distance(position_t &a, position_t &b);
+	// Used to motionblur the refrence image over time
+	void MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount, float flMaxChange);
+	// Used to blur the motion image (so it can find bounds much better)
+	void BlurMotion(motion_t* Motion);
+	// Fast
+	float Q_sqrt( float number );
 
-    struct ssize_t
-    {
-        float w;
-        float h;
-    };
+	struct ssize_t
+	{
+		float w;
+		float h;
+	};
 
-    // Time since the program started
-    double GetCurrentTime();
+	// Time since the program started
+	double GetCurrentTime();
 
-    class IDetectorObjectTracker;
+	class IDetectorObjectTracker;
 
-    typedef unsigned int targetid;
-    class CTrackedObject : public CDetectorBaseClass
-    {
-        friend class IDetectorObjectTracker;
-    public:
-        CTrackedObject( targetid ID );
-        ~CTrackedObject();
-        targetid    ID();
-        position_t  Position();
-        position_t  CenterPosition();
-        velocity_t  Velocity();
-        ssize_t     Size();
-        double      LastSeen();
-        float       GetScore(target_t* Target);
-        void        Update(position_t& pos, ssize_t& size);
-        // If the target was not found simulate update
-        void        SimulateUpdate();
-        bool operator ==(CTrackedObject* a);
-    private:
-        ssize_t     m_sSize;
-        targetid    m_tiID;
-        velocity_t  m_sVelocity;
-        position_t  m_sPosition;
-        position_t  m_sCenterPosition;
-        double      m_dblLastSeen;
-    };
+	typedef unsigned int targetid;
+	class CTrackedObject : public CDetectorBaseClass
+	{
+		friend class IDetectorObjectTracker;
+	public:
+		CTrackedObject( targetid ID );
+		~CTrackedObject();
+		targetid	ID();
+		position_t  Position();
+		position_t  CenterPosition();
+		velocity_t  Velocity();
+		ssize_t	 Size();
+		double	  LastSeen();
+		float	   GetScore(target_t* Target);
+		void		Update(position_t& pos, ssize_t& size);
+		// If the target was not found simulate update
+		void		SimulateUpdate();
+		bool operator ==(CTrackedObject* a);
+	private:
+		ssize_t	 m_sSize;
+		targetid	m_tiID;
+		velocity_t  m_sVelocity;
+		position_t  m_sPosition;
+		position_t  m_sCenterPosition;
+		double	  m_dblLastSeen;
+	};
 
-    typedef std::list<CTrackedObject*> TrackedObjects;
+	typedef std::list<CTrackedObject*> TrackedObjects;
 
-    class IObjectTracker : public CDetectorBaseClass
-    {
-    public:
-        virtual void PushTargets( target_t* Targets[MAX_TARGETS], int Count ) = 0;
-        virtual TrackedObjects* GetTrackedObjects() = 0;
-    };
+	class IObjectTracker : public CDetectorBaseClass
+	{
+	public:
+		virtual void PushTargets( target_t* Targets[MAX_TARGETS], int Count ) = 0;
+		virtual TrackedObjects* GetTrackedObjects() = 0;
+	};
 
-    class IDescriptor : public CDetectorBaseClass
-    {
-    public:
-        virtual ~IDescriptor(){};
-        // Returns an array of floats to discribe an object
-        virtual char* GetDescriptor(motion_t* Motion) = 0;
-    };
+	class IDescriptor : public CDetectorBaseClass
+	{
+	public:
+		virtual ~IDescriptor(){};
+		// Returns an array of floats to discribe an object
+		virtual char* GetDescriptor(motion_t* Motion) = 0;
+	};
 }
 #endif // LIB_DET_INTERFACE_H

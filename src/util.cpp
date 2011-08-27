@@ -16,8 +16,8 @@ using namespace std;
 
 #ifdef WINDOWS // We need a standard for this...
 /*
-    Thanks to Carl Staelin for this snippet
-    http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
+	Thanks to Carl Staelin for this snippet
+	http://stackoverflow.com/questions/5404277/porting-clock-gettime-to-windows
 */
 #define CLOCKS_PER_SEC 0
 LARGE_INTEGER getFILETIMEoffset()
@@ -42,13 +42,13 @@ LARGE_INTEGER getFILETIMEoffset()
 
 int ::clock_gettime( int X, struct timeval* tv )
 {
-	LARGE_INTEGER           t;
-	FILETIME                f;
-	double                  microseconds;
-	static LARGE_INTEGER    offset;
-	static double           frequencyToMicroseconds;
-	static int              initialized = 0;
-	static BOOL             usePerformanceCounter = 0;
+	LARGE_INTEGER		   t;
+	FILETIME				f;
+	double				  microseconds;
+	static LARGE_INTEGER	offset;
+	static double		   frequencyToMicroseconds;
+	static int			  initialized = 0;
+	static BOOL			 usePerformanceCounter = 0;
 
 	if ( !initialized )
 	{
@@ -67,7 +67,7 @@ int ::clock_gettime( int X, struct timeval* tv )
 		}
 	}
 	if ( usePerformanceCounter )
-        QueryPerformanceCounter( &t );
+		QueryPerformanceCounter( &t );
 	else
 	{
 		GetSystemTimeAsFileTime( &f );
@@ -88,17 +88,17 @@ int ::clock_gettime( int X, struct timeval* tv )
 double StartTime = -1.0;
 double Detector::GetCurrentTime()
 {
-    if(StartTime < 0.0)
-    {
-        struct timespec now;
-        clock_gettime( CLOCK_MONOTONIC, &now );
+	if(StartTime < 0.0)
+	{
+		struct timespec now;
+		clock_gettime( CLOCK_MONOTONIC, &now );
 
-        StartTime = ( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec;
-    }
+		StartTime = ( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec;
+	}
 	struct timespec now;
 	clock_gettime( CLOCK_MONOTONIC, &now );
 
-    return (( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec) - StartTime; // Why was I deviding by 0?
+	return (( double )( now.tv_nsec / CLOCKS_PER_SEC ) / 1000.0 + ( double )now.tv_sec) - StartTime; // Why was I deviding by 0?
 	//return ( double )( now.tv_nsec ) / 1000.0 + ( double )now.tv_sec;
 }
 
@@ -109,98 +109,98 @@ bool Detector::imagesize_tEqual( imagesize_t a, imagesize_t b )
 
 void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float flBlurAmmount, float flMaxChange)
 {
-    if( !imagesize_tEqual(Refrence->GetSize(), New->GetSize()) )
-        return;
-    imagesize_t size = Refrence->GetSize();
-    pixel_t *pixa, *pixb;
-    XY_LOOP(size.width, size.height)
-    {
-        pixa = Refrence->Pixel(x,y);
-        pixb = New->Pixel(x,y);
+	if( !imagesize_tEqual(Refrence->GetSize(), New->GetSize()) )
+		return;
+	imagesize_t size = Refrence->GetSize();
+	pixel_t *pixa, *pixb;
+	XY_LOOP(size.width, size.height)
+	{
+		pixa = Refrence->Pixel(x,y);
+		pixb = New->Pixel(x,y);
 
-        pixa->r -= max(-flMaxChange, min(flMaxChange, (float)(pixa->r - pixb->r) * flBlurAmmount));
-        pixa->g -= max(-flMaxChange, min(flMaxChange, (float)(pixa->g - pixb->g) * flBlurAmmount));
-        pixa->b -= max(-flMaxChange, min(flMaxChange, (float)(pixa->b - pixb->b) * flBlurAmmount));
-    }
+		pixa->r -= max(-flMaxChange, min(flMaxChange, (float)(pixa->r - pixb->r) * flBlurAmmount));
+		pixa->g -= max(-flMaxChange, min(flMaxChange, (float)(pixa->g - pixb->g) * flBlurAmmount));
+		pixa->b -= max(-flMaxChange, min(flMaxChange, (float)(pixa->b - pixb->b) * flBlurAmmount));
+	}
 }
 
 // This blur is so the "blobs" join together much better
 
 void Detector::BlurMotion(motion_t* motion)
 {
-    unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
-    int w = motion->size.width;
-    int h = motion->size.height;
+	unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
+	int w = motion->size.width;
+	int h = motion->size.height;
 
-    int blursize = 3;
-    int blurthreshold = 1;
+	int blursize = 3;
+	int blurthreshold = 1;
 
-    int blur, start, end;
-    XY_LOOP(w,h)
-    {
-        blur = 0;
+	int blur, start, end;
+	XY_LOOP(w,h)
+	{
+		blur = 0;
 
-        start = max(0, y - blursize);
-        end = min(h, y + blursize + 1);
-        for(int i = start; i < end; i++)
-            blur += PMOTION_XY(motion, x, i);
+		start = max(0, y - blursize);
+		end = min(h, y + blursize + 1);
+		for(int i = start; i < end; i++)
+			blur += PMOTION_XY(motion, x, i);
 
-        start = max(0, x - blursize);
-        end = min(w, x + blursize + 1);
-        for(int i = start; i < end; i++)
-            blur += PMOTION_XY(motion, i, y);
+		start = max(0, x - blursize);
+		end = min(w, x + blursize + 1);
+		for(int i = start; i < end; i++)
+			blur += PMOTION_XY(motion, i, y);
 
-        newmotion[x + y * w] = blur > blurthreshold; // Change to >1 to reduce noise
-    }
-    delete [] motion->motion;
-    motion->motion = newmotion;
+		newmotion[x + y * w] = blur > blurthreshold; // Change to >1 to reduce noise
+	}
+	delete [] motion->motion;
+	motion->motion = newmotion;
 }
 
 void S_BlurMotion(motion_t* motion)
 {
-    unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
+	unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
 
-    XY_LOOP(motion->size.width, motion->size.height)
-    {
-        if(x == 0 || x == motion->size.width - 1) continue;
-        if(y == 0 || y == motion->size.height - 1) continue;
+	XY_LOOP(motion->size.width, motion->size.height)
+	{
+		if(x == 0 || x == motion->size.width - 1) continue;
+		if(y == 0 || y == motion->size.height - 1) continue;
 
-        short has = 0;
-        has += PMOTION_XY(motion, x-1,  y-1);
-        has += PMOTION_XY(motion, x,    y-1);
-        has += PMOTION_XY(motion, x+1,  y-1);
+		short has = 0;
+		has += PMOTION_XY(motion, x-1,  y-1);
+		has += PMOTION_XY(motion, x,	y-1);
+		has += PMOTION_XY(motion, x+1,  y-1);
 
-        has += PMOTION_XY(motion, x-1,  y+1);
-        has += PMOTION_XY(motion, x,    y+1);
-        has += PMOTION_XY(motion, x+1,  y+1);
+		has += PMOTION_XY(motion, x-1,  y+1);
+		has += PMOTION_XY(motion, x,	y+1);
+		has += PMOTION_XY(motion, x+1,  y+1);
 
-        has += PMOTION_XY(motion, x-1, y);
-        has += PMOTION_XY(motion, x+1, y);
+		has += PMOTION_XY(motion, x-1, y);
+		has += PMOTION_XY(motion, x+1, y);
 
-        has += PMOTION_XY(motion, x, y);
+		has += PMOTION_XY(motion, x, y);
 
 
-        newmotion[x + y * motion->size.width] = has > 1 ? PIXEL_MOTION : PIXEL_NOMOTION;
-    }
+		newmotion[x + y * motion->size.width] = has > 1 ? PIXEL_MOTION : PIXEL_NOMOTION;
+	}
 
-    delete [] motion->motion;
-    motion->motion = newmotion;
+	delete [] motion->motion;
+	motion->motion = newmotion;
 }
 
 
 float Detector::Q_sqrt( float number ) // Thanks whoever made this (this implentation is from Quake III Arena)
 {
-    long i;
-    float x, y;
-    const float f = 1.5F;
+	long i;
+	float x, y;
+	const float f = 1.5F;
 
-    x = number * 0.5F;
-    y  = number;
-    i  = * ( long * ) &y;
-    i  = 0x5f3759df - ( i >> 1 );
-    y  = * ( float * ) &i;
-    y  = y * ( f - ( x * y * y ) );
-    y  = y * ( f - ( x * y * y ) );
-    return number * y;
+	x = number * 0.5F;
+	y  = number;
+	i  = * ( long * ) &y;
+	i  = 0x5f3759df - ( i >> 1 );
+	y  = * ( float * ) &i;
+	y  = y * ( f - ( x * y * y ) );
+	y  = y * ( f - ( x * y * y ) );
+	return number * y;
 }
 
