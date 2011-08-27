@@ -139,7 +139,7 @@ CDetector::CDetector( imagesize_t Size )
 
 	m_pMotionImage = new motion_t();
 	m_pMotionImage->size = Size;
-	m_pMotionImage->motion = new unsigned char[Size.width + Size.height * Size.width];
+	m_pMotionImage->motion = new unsigned char[Size.height * Size.width];
 
 	m_iTargets = 0;
 	m_flMinTargSize = .05f;
@@ -228,7 +228,7 @@ bool CDetector::PushImage( CDetectorImage* pImage )
 				motion_t* movement = new motion_t;
 				movement->size.height = helper->MaxY - helper->MinY;
 				movement->size.width = helper->MaxX - helper->MinX;
-				movement->motion = new unsigned char[movement->size.width + movement->size.height * movement->size.width];
+				movement->motion = new unsigned char[movement->size.height * movement->size.width];
 
 				int minx = helper->MinX;
 				int miny = helper->MinY;
@@ -266,7 +266,7 @@ EndLoop:
 
 	m_iTargets = count;
 
-	int MaxSetPixels = m_sSize.width + m_sSize.height * m_sSize.width;
+	int MaxSetPixels = m_sSize.height * m_sSize.width;
 	int SetPixels = 0;
 
 	XY_LOOP(m_sSize.width, m_sSize.height)

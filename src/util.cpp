@@ -128,7 +128,7 @@ void Detector::MotionBlur(CDetectorImage* Refrence, CDetectorImage* New, float f
 
 void Detector::BlurMotion(motion_t* motion)
 {
-	unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
+	unsigned char* newmotion = new unsigned char[motion->size.height * motion->size.width];
 	int w = motion->size.width;
 	int h = motion->size.height;
 
@@ -158,7 +158,7 @@ void Detector::BlurMotion(motion_t* motion)
 
 void S_BlurMotion(motion_t* motion)
 {
-	unsigned char* newmotion = new unsigned char[motion->size.width + motion->size.height * motion->size.width];
+	unsigned char* newmotion = new unsigned char[motion->size.height * motion->size.width];
 
 	XY_LOOP(motion->size.width, motion->size.height)
 	{

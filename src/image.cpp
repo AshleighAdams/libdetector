@@ -39,7 +39,7 @@ CDetectorImage* CDetectorImage::FromFile(char* File)
 	
 	CDetectorImage* ret = new CDetectorImage(size);
 	
-	int datsize = (size.width + size.height * size.width) * 3; // 3 bytes
+	int datsize = (size.height * size.width) * 3; // 3 bytes
 	unsigned char* data = new unsigned char[datsize];
 	file.read((char*)data, datsize);
 	
@@ -63,7 +63,7 @@ bool CDetectorImage::Save(char* File)
 {
 	ofstream file (File, ios::out|ios::binary);
 	
-	if(!file.is_open()) return NULL;
+	if(!file.is_open()) return false;
 	
 	file.put('X');
 	file.put('D');
@@ -72,7 +72,7 @@ bool CDetectorImage::Save(char* File)
 	file.write((const char*)&m_sSize.width, sizeof(int));
 	file.write((const char*)&m_sSize.height, sizeof(int));
 	
-	int datsize = (m_sSize.width + m_sSize.height * m_sSize.width) * 3;
+	int datsize = (m_sSize.height * m_sSize.width) * 3;
 	file.write((const char*)m_psPixels, datsize);
 	file.close();
 	
@@ -84,7 +84,7 @@ CDetectorImage::CDetectorImage( int Width, int Height )
 	this->Refrence();
 	m_sSize.width = Width;
 	m_sSize.height = Height;
-	m_psPixels = new pixel_t[Width + Width * Height];
+	m_psPixels = new pixel_t[Width * Height];
 }
 
 CDetectorImage::CDetectorImage( imagesize_t size )
@@ -92,7 +92,7 @@ CDetectorImage::CDetectorImage( imagesize_t size )
 	this->Refrence();
 	m_sSize.width = size.width;
 	m_sSize.height = size.height;
-	m_psPixels = new pixel_t[size.width + size.width * size.height];
+	m_psPixels = new pixel_t[size.width * size.height];
 }
 
 CDetectorImage::~CDetectorImage()
@@ -105,7 +105,7 @@ CDetectorImage* CDetectorImage::Exclusive()
 	if( m_iRefrenceCount == 1 )
 		return this;
 	imagesize_t selfsize = this->GetSize();
-	int size_total = ( selfsize.width + selfsize.width * selfsize.height ) * 3; // 3 bytes per pixel;
+	int size_total = ( selfsize.width * selfsize.height ) * 3; // 3 bytes per pixel;
 	CDetectorImage* ptr = new CDetectorImage( selfsize );
 	memcpy( ptr->m_psPixels, this->m_psPixels, size_total );
 	this->UnRefrence();
