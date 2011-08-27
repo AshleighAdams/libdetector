@@ -204,3 +204,10 @@ float Detector::Q_sqrt( float number ) // Thanks whoever made this (this implent
 	return number * y;
 }
 
+/*
+bool Detector::IsBigEndian()
+{
+	unsigned char test[2] { 1, 0 };
+	return *(short*) test != 1;
+}
+*/

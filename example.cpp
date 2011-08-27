@@ -144,7 +144,14 @@ bool ProccessFrame(CDetectorImage* Image)
 		g_pDetector->SetDiffrenceThreshold(65.f);
 
 		g_pDesc = new CBaseDescriptor();
-		//Disc->LoadDescriptor("");
+		
+		/*CDetectorImage* Person = CDetectorImage::FromFile("person.xdi");
+		if(Person)
+		{
+			g_pDesc->LoadDescriptor(Person);
+			Person->UnRefrence();
+		}else cout << "Coudln't load person.xdi!\n";*/
+		
 		g_pDetector->SetDescriptor(g_pDesc);
 
 

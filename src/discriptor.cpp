@@ -99,7 +99,51 @@ char* CBaseDescriptor::GetDescriptor(motion_t* Motion)
 
 bool CBaseDescriptor::LoadDescriptor(CDetectorImage* pImage)
 {
+	// Create a motion_t
+	imagesize_t size = pImage->GetSize();
+	
+	motion_t* Motion = new motion_t;
+	Motion->size.width = size.width;
+	Motion->size.height = size.height;
+	
+	Motion->motion = new unsigned char[size.width * size.height];
+	
+	pixel_t* pix;
+	int count;
+	XY_LOOP(size.width, size.height)
+	{
+		pix = pImage->Pixel(x, y);
+		count = pix->r + pix->g + pix->b;
+		PMOTION_XY(Motion, x, y) = count == (255 * 3) ? PIXEL_MOTION : PIXEL_NOMOTION;
+	}
+	
+	// Copy paste from above almost:
+	int LongestPos = 0;
+	float flLongestDistance = 0;
+	float RealDistances[360-1];
 
+	int sx = Motion->size.width / 2, sy = Motion->size.width / 2;
+
+	float distance;
+	for(int i = 0; i < 360; i++)
+	{
+		distance = GetDistance(Motion, i, sx, sy);
+		if(distance == 0) distance = 1;
+		RealDistances[i] = distance;
+		if(distance > flLongestDistance)
+		{
+			flLongestDistance = distance;
+			LongestPos = i;
+		}
+	}
+
+	for(int i = 0; i < 360; i++)
+		m_PersonHisto.values[i] = RealDistances[i] / flLongestDistance;
+
+	m_PersonHisto.highestvalue = LongestPos;
+	
 	return false;
 }
+
+
 
