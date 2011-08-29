@@ -32,10 +32,10 @@ CDetectorImage* CDetectorImage::FromFile(char* File)
 	imagesize_t size;
 	
 	file.read(buffer, sizeof(int));
-	size.width = atoi(buffer);
+	size.width = *(int*)buffer;
 	
 	file.read(buffer, sizeof(int));
-	size.height = atoi(buffer);
+	size.height = *(int*)buffer;
 	
 	CDetectorImage* ret = new CDetectorImage(size);
 	

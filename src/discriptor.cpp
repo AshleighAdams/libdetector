@@ -122,7 +122,7 @@ bool CBaseDescriptor::LoadDescriptor(CDetectorImage* pImage)
 	float flLongestDistance = 0;
 	float RealDistances[360-1];
 
-	int sx = Motion->size.width / 2, sy = Motion->size.width / 2;
+	int sx = Motion->size.width / 2, sy = Motion->size.height / 2;
 
 	float distance;
 	for(int i = 0; i < 360; i++)
