@@ -114,6 +114,10 @@ CDetectorImage* CDetectorImage::Exclusive()
 
 pixel_t* CDetectorImage::Pixel( int x, int y )
 {
+	if(x < 0 || y < 0 || x > 339 || y > 239)
+	{
+		cout << "OVERFLOW!\n";
+	}
 	return &m_psPixels[x + y * m_sSize.width];
 }
 
@@ -146,13 +150,16 @@ void CDetectorImage::DrawBox(position_t& a, position_t& b)
 	RESTRAIN(b.x);
 	RESTRAIN(b.y);
 
-	int startx  = a.x * m_sSize.width + 1;
-	int starty  = a.y * m_sSize.height;
+	int startx  = a.x * (float)(m_sSize.width + 1);
+	int starty  = a.y * (float)(m_sSize.height - 1);
 
-	int endx	= b.x * m_sSize.width;
-	int endy	= b.y * m_sSize.height + 1;
-
+	int endx	= b.x * (float)(m_sSize.width - 1);
+	int endy	= b.y * (float)(m_sSize.height + 1);
+	
+	// Sometimes it hits the size of the image, so lets fix that shall we
 	startx = min(m_sSize.width -1, startx);
+	endx = min(m_sSize.width -1, endx);
+	starty = min(m_sSize.height -1, starty);
 	endy = min(m_sSize.height -1, endy);
 
 	for (int x = startx; x < endx; x++)
@@ -201,10 +208,11 @@ void CDetectorImage::DrawLine(position_t& a, position_t& b)
 	RESTRAIN(b.x);
 	RESTRAIN(b.y);
 
-	int	 x0 = a.x * m_sSize.width,
-			y0 = a.y * m_sSize.height,
-			x1 = b.x * m_sSize.width,
-			y1 = b.y * m_sSize.height;
+	int	 	x0 = a.x * (float)(m_sSize.width - 1), // Stupid floats to int to float crap, caused ma codez to segfault!
+			y0 = a.y * (float)(m_sSize.height - 1),
+			x1 = b.x * (float)(m_sSize.width - 1),
+			y1 = b.y * (float)(m_sSize.height - 1);
+			
 	int dx = abs(x1 - x0);
 	int dy = abs(y1 - y0);
 
