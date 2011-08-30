@@ -71,19 +71,19 @@ float GetDistance(motion_t* Motion, int Angle, int startx, int starty)
 #define HISTO_VALUE(x, pos) x.values[(pos + x.highestvalue) % 360]
 const float flDiffThreshold = 0.05f;
 
-float Match(histogram_t& a, histogram_t& b)
+float Match(histogram_t& a, histogram_t& b) // Lower is better
 {
-	// FIXME: 
-	float flA, flB, flDiff;
-	flDiff = 0.f;
+	// MSE
+	float flA, flB, flRet;
+	flRet = 0.f;
 	for(int i = 0; i < 360; i++)
 	{
 		flA = HISTO_VALUE(a, i);
 		flB = HISTO_VALUE(b, i);
 		
-		flDiff += abs(flA - flB);
+		flRet += (flA - flB) * (flA - flB);
 	}
-	return flDiff / 360.f;
+	return flRet / 360.f; // Average them and return
 }
 
 char* CBaseDescriptor::GetDescriptor(motion_t* Motion)

@@ -32,7 +32,7 @@ CDetectorImage* CDetectorImage::FromFile(char* File)
 	imagesize_t size;
 	
 	file.read(buffer, sizeof(int));
-	size.width = *(int*)buffer;
+ 	size.width = *(int*)buffer;
 	
 	file.read(buffer, sizeof(int));
 	size.height = *(int*)buffer;
@@ -117,7 +117,7 @@ pixel_t* CDetectorImage::Pixel( int x, int y )
 	if(x < 0 || y < 0 || x > m_sSize.width || y > m_sSize.height)
 	{
 		cout << "OVERFLOW!\n";
-		return;
+		return NULL;
 	}
 	return &m_psPixels[x + y * m_sSize.width];
 }
