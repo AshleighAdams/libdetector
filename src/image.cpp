@@ -114,9 +114,10 @@ CDetectorImage* CDetectorImage::Exclusive()
 
 pixel_t* CDetectorImage::Pixel( int x, int y )
 {
-	if(x < 0 || y < 0 || x > 339 || y > 239)
+	if(x < 0 || y < 0 || x > m_sSize.width || y > m_sSize.height)
 	{
 		cout << "OVERFLOW!\n";
+		return;
 	}
 	return &m_psPixels[x + y * m_sSize.width];
 }
