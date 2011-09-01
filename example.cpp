@@ -18,6 +18,23 @@ using namespace std; // OpenCV needs this else we get 500 errors....
 #define DETECTOR_OPENCV
 #include "libdetector/include/libdetector.h"
 
+#define XY_LOOP_START(_x_,_y_,_endx_,_endy_) \
+	for(int y = _y_; y < _endy_; y++)\
+	for(int x = _x_; x < _endx_; x++)
+
+// SFML and GWEN shit
+#include <SFML/System.hpp>
+#include <SFML/Graphics.hpp>
+#include <cmath>
+
+#include "Gwen/Renderers/SFML.h"
+#include "Gwen/Input/SFML.h"
+
+#include "Gwen/Skins/Simple.h"
+#include "Gwen/Skins/TexturedBase.h"
+
+#include "Gwen/Controls/WindowControl.h"
+
 using namespace Detector;
 
 const int TrailLength = 40;
@@ -44,7 +61,7 @@ void NewObject(CTrackedObject* Obj)
 	Trails[idx] = Trail;
 }
 
-void LastObject(CTrackedObject* Obj)
+void LostObject(CTrackedObject* Obj)
 {
 	cout << "Lost object! @ " << GetCurrentTime() << "\n";
 	int idx = Obj->ID() % 1024;
@@ -96,70 +113,70 @@ void DrawTrails(CDetectorImage* Img, CTrackedObject* Obj)
 CDetector* g_pDetector = NULL;
 CObjectTracker* g_pTracker = NULL;
 
-// Settings n stuff
-bool g_bWriteFrame = false;
-bool g_bExiting = false;
-short g_Sensetivity;
-double g_NextTime;
+// Globals
+bool 				g_bWriteFrame = false;
+bool 				g_bExiting = false;
+short 				g_Sensetivity;
+double 				g_NextTime;
+target_t* 			g_Targets[MAX_TARGETS];
+int 				g_Count = 0;
 
-void SettingsThread()
+color_t 			Red;
+color_t 			Green;
+color_t 			Blue;
+color_t 			Orange;
+
+CDetectorImage* 	g_pDetectorImage;
+CBaseDescriptor*	g_pDesc;
+
+// GUI globals
+Gwen::Controls::Canvas* 		g_pCanvas;
+Gwen::Controls::WindowControl* 	g_pWindowCam;
+
+void Init(imagesize_t size)
 {
-	char input[255];
-	cout << (g_bWriteFrame ? "Saving on" : "Saving off") << "\n";
-	while(!g_bExiting)
+	Red.r = 255;
+	Red.g = 0;
+	Red.b = 0;
+
+	Green.r = 0;
+	Green.g = 255;
+	Green.b = 0;
+
+	Blue.r = 0;
+	Blue.g = 0;
+	Blue.b = 255;
+	
+	Orange.r = 255;
+	Orange.g = 165;
+	Orange.b = 0;
+	
+	g_pDetector = new CDetector(size);
+	g_pDetector->SetDiffrenceThreshold(65.f);
+
+	g_pDesc = new CBaseDescriptor();
+	
+	CDetectorImage* Person = CDetectorImage::FromFile("person.xdi");
+	if(Person)
 	{
-		cin >> input;
+		g_pDesc->LoadDescriptor(Person);
+		Person->UnRefrence();
+	}else cout << "Coudln't load person.xdi!\n";
+	
+	g_pDetector->SetDescriptor(g_pDesc);
 
-		if(strcmp(input, "togglerecord") == 0)
-		{
-			g_bWriteFrame = !g_bWriteFrame;
-			cout << (g_bWriteFrame ? "Saving on" : "Saving off") << "\n";
-		}
-		else if(strcmp(input, "sensetivity") == 0)
-		{
-			cout << "Enter ammount: \n";
-			short amm;
-			cin >> amm;
-			g_pDetector->SetDiffrenceThreshold(amm);
-		}else if(strcmp(input, "exit") == 0)
-		{
-			g_bExiting = true;
-			return;
-		}
-		else
-			cout << "Setting not found\n";
-	}
+
+	g_pTracker = new CObjectTracker();
+	g_pTracker->SetEvent(EVENT_NEWTARG,	(void*)&NewObject);
+	g_pTracker->SetEvent(EVENT_LOST,	(void*)&LostObject);
+	g_pTracker->SetEvent(EVENT_UPDATE,	(void*)&Update);
 }
-
-target_t* g_Targets[MAX_TARGETS];
-int g_Count = 0;
-
-CBaseDescriptor* g_pDesc;
 
 bool ProccessFrame(CDetectorImage* Image)
 {
-	if(!g_pDetector && !g_pTracker)
-	{
-		g_pDetector = new CDetector(Image->GetSize());
-		g_pDetector->SetDiffrenceThreshold(65.f);
-
-		g_pDesc = new CBaseDescriptor();
-		
-		/*CDetectorImage* Person = CDetectorImage::FromFile("person.xdi");
-		if(Person)
-		{
-			g_pDesc->LoadDescriptor(Person);
-			Person->UnRefrence();
-		}else cout << "Coudln't load person.xdi!\n";*/
-		
-		g_pDetector->SetDescriptor(g_pDesc);
-
-
-		g_pTracker = new CObjectTracker();
-		g_pTracker->SetEvent(EVENT_NEWTARG,	 (void*)&NewObject);
-		g_pTracker->SetEvent(EVENT_LOST,		(void*)&LastObject);
-		g_pTracker->SetEvent(EVENT_UPDATE,	  (void*)&Update);
-	}
+	if(!g_pDetector) // Havn't loaded yet
+		Init(Image->GetSize());
+	
 	g_pDetector->PushImage(Image);
 	g_Count = g_pDetector->GetTargets(g_Targets);
 
@@ -167,27 +184,14 @@ bool ProccessFrame(CDetectorImage* Image)
 
 	TrackedObjects Objs = *g_pTracker->GetTrackedObjects();
 
-	color_t NoneTrackedCol;
-	color_t TrackedCol;
-	color_t HistoCol;
 
-	NoneTrackedCol.r = 255;
-	NoneTrackedCol.g = 0;
-	NoneTrackedCol.b = 0;
-
-	TrackedCol.r = 0;
-	TrackedCol.g = 255;
-	TrackedCol.b = 0;
-
-	HistoCol.r = 0;
-	HistoCol.g = 0;
-	HistoCol.b = 255;
-
-	Image->DrawColor(NoneTrackedCol);
+	Image->DrawColor(Red);
+	
 	for(int i = 0; i < g_Count; i++)
-		Image->DrawTarget(g_Targets[i]);
+		Image->DrawTarget(g_Targets[i]);		
 
-	Image->DrawColor(TrackedCol);
+	Image->DrawColor(Green);
+	
 	bool ret = false;
 	for(CTrackedObject* Obj : Objs)
 	{
@@ -195,27 +199,46 @@ bool ProccessFrame(CDetectorImage* Image)
 		Image->DrawTarget(Obj);
 		DrawTrails(Image, Obj);
 	}
-
-	float motion = g_pDetector->GetTotalMotion();
-
-	if(g_NextTime < GetCurrentTime())
+	
+	if(g_Count > 0 && false)
 	{
-		g_NextTime = GetCurrentTime() + 1.f;
-		if(motion > 0.0005)
+		target_t* targ = g_Targets[0];
+		motion_t* mot = g_pDetector->GetMotionImage();
+		
+		int startx = mot->size.width * targ->x;
+		int starty = mot->size.height * targ->y;
+		
+		int endx = mot->size.width * (targ->x + targ->width);
+		int endy = mot->size.height * (targ->y + targ->height);
+		
+		int w = endx - startx;
+		int h = endy - starty;
+		
+		CDetectorImage* img = new CDetectorImage(w, h);
+		
+		pixel_t* pix;
+		int col;
+		
+		XY_LOOP_START(startx, starty, endx, endy)
 		{
-			//g_Sensetivity++;
-			//g_Sensetivity = min((short)100, g_Sensetivity);
-			//g_pDetector->SetDiffrenceThreshold(g_Sensetivity);
+			col = PMOTION_XY(mot, x, y) > 0 ? 255 : 0;
+			pix = img->Pixel(x - startx, y - starty);
+			pix->r = col;
+			pix->g = col;
+			pix->b = col;
 		}
-		else if(motion == 0.f)
-		{
-			//g_Sensetivity--;
-			//g_Sensetivity = max((short)50, g_Sensetivity);
-			//g_pDetector->SetDiffrenceThreshold(g_Sensetivity);
-		}
+		
+		char* str = new char[255];
+		sprintf(str, "save_%f.xdi", GetCurrentTime() );
+		
+		img->Save(str);
+		img->UnRefrence();
+		
+		delete str;
 	}
+	
 
-	Image->DrawColor(HistoCol);
+	Image->DrawColor(Blue);
 
 	if(g_pDetector->GetNumberOfTargets() > 0)
 	{
@@ -235,15 +258,30 @@ bool ProccessFrame(CDetectorImage* Image)
 			pos2.y = pos1.y;
 		}
 	}
+	position_t pos1;
+	position_t pos2;
+	
+	Image->DrawColor(Orange);
+
+	for(int i = 0; i < 360; i++)
+	{
+		pos1.x = (float)i / 360.f;
+		pos1.y = 0.f;
+		if(i > 0)
+		{
+			pos1.y = 1.f - g_pDesc->m_PersonHisto.values[(i + g_pDesc->m_PersonHisto.highestvalue) % 360] * 0.25;
+			Image->DrawLine(pos1, pos2);
+		}
+		pos2.x = pos1.x;
+		pos2.y = pos1.y;
+	}
 	return ret;
 }
 
-CDetectorImage* g_pDetectorImage;
+
 
 int main()
 {
-	thread thrd(SettingsThread);
-
 	CvCapture* capture = cvCaptureFromCAM( 1 );
 
 	if ( !capture )
@@ -251,10 +289,11 @@ int main()
 		fprintf( stderr, "ERROR: capture is NULL \n" );
 		return 1;
 	}
-
+	
+	// Lower res = faster processing time.
 	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 320);
-	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 260);
-	cvSetCaptureProperty(capture, CV_CAP_PROP_FOURCC, CV_FOURCC('I', 'Y', 'U', 'V'));
+	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 240);
+	//cvSetCaptureProperty(capture, CV_CAP_PROP_FOURCC, CV_FOURCC('I', 'Y', 'U', 'V'));
 
 	IplImage* frame = cvQueryFrame( capture );
 	if ( !frame )
@@ -279,14 +318,51 @@ int main()
 			imgSize
 			);
 
+	// Init the Gwen GUI and SFML window
+	sf::RenderWindow App( sf::VideoMode( 640, 480, 32 ), "Detector", sf::Style::Close );
+	Gwen::Renderer::SFML GwenRenderer( App );
+	Gwen::Skin::TexturedBase skin;
+	skin.SetRender( &GwenRenderer );
+	skin.Init( "DefaultSkin.png" );
+	skin.SetDefaultFont( L"OpenSans.ttf", 11 );
+	
+	g_pCanvas = new Gwen::Controls::Canvas( &skin );
+	
+	g_pCanvas->SetSize( App.GetWidth(), App.GetHeight() );
+	g_pCanvas->SetDrawBackground( true );
+	g_pCanvas->SetBackgroundColor( Gwen::Color( 150, 170, 170, 255 ) );
+	
+	
+	g_pWindowCam = new Gwen::Controls::WindowControl(g_pCanvas);
+	g_pWindowCam->SetSize( 320, 240 );
+	g_pWindowCam->SetClosable(false);
+	g_pWindowCam->SetTitle("Camera");
+
+	Gwen::Input::SFML GwenInput;
+	GwenInput.Initialize( g_pCanvas );
 
 	// Create a window in which the captured images will be presented
 	cvNamedWindow( "Detector", CV_WINDOW_AUTOSIZE );
 	cvNamedWindow( "Detector - Motion", CV_WINDOW_AUTOSIZE );
 	cvMoveWindow( "Detector - Motion", 640, 0);
 	// Show the image captured from the camera in the window and repeat
-	while ( !g_bExiting )
+	while ( App.IsOpened() )
 	{
+		// Handle events
+		sf::Event Event;
+		while ( App.GetEvent(Event) )
+		{
+			if ((Event.Type == sf::Event::Closed) || 
+									((Event.Type == sf::Event::KeyPressed) && (Event.Key.Code == sf::Key::Escape)))
+			{
+				App.Close();
+				break;
+			}
+			GwenInput.ProcessMessage( Event );
+		}
+		
+		App.Clear();
+		
 		// Get one frame
 		frame = cvQueryFrame( capture );
 		if ( !frame )
@@ -312,8 +388,10 @@ int main()
 			UpdateFrame(g_pDetector->GetMotionImage(), frame);
 			cvShowImage( "Detector - Motion", frame );
 		}
-		// Enter breaks loop
-		if ( (cvWaitKey(10) & 255) == 27 ) break;
+		
+		g_pCanvas->RenderCanvas();
+		App.Display();
+		cvWaitKey(10);
 	}
 	// Release the capture device housekeeping
 	cvReleaseCapture( &capture ); // Likes to segfault
