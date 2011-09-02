@@ -27,6 +27,12 @@ using namespace std; // OpenCV needs this else we get 500 errors....
 #include <SFML/Graphics.hpp>
 #include <cmath>
 
+#include "Gwen/Gwen.h"
+#include "Gwen/BaseRender.h"
+#include "Gwen/Utility.h"
+#include "Gwen/Font.h"
+#include "Gwen/Texture.h"
+
 #include "Gwen/Renderers/SFML.h"
 #include "Gwen/Input/SFML.h"
 
@@ -34,6 +40,10 @@ using namespace std; // OpenCV needs this else we get 500 errors....
 #include "Gwen/Skins/TexturedBase.h"
 
 #include "Gwen/Controls/WindowControl.h"
+#include "Gwen/Controls/Button.h"
+#include "Gwen/Controls/CheckBox.h"
+#include "Gwen/Controls/TextBox.h"
+#include "Gwen/Controls/ImagePanel.h"
 
 using namespace Detector;
 
@@ -129,9 +139,15 @@ color_t 			Orange;
 CDetectorImage* 	g_pDetectorImage;
 CBaseDescriptor*	g_pDesc;
 
+// OpenCV
+CvCapture* 			g_pCapture;
+
 // GUI globals
-Gwen::Controls::Canvas* 		g_pCanvas;
-Gwen::Controls::WindowControl* 	g_pWindowCam;
+Gwen::Controls::Canvas* 			g_pCanvas;
+Gwen::Controls::WindowControl* 		g_pWindowCam;
+Gwen::Controls::WindowControl* 		g_pWindowSet;
+Gwen::Controls::ImagePanel*			g_pImage;
+Gwen::Controls::CheckBoxWithLabel* 	g_pCeckBoxRecord;
 
 void Init(imagesize_t size)
 {
@@ -278,33 +294,23 @@ bool ProccessFrame(CDetectorImage* Image)
 	return ret;
 }
 
+// All the camera stuffs
+bool g_bCapThreadRunning = true;
+bool g_bCapThreadClosed = false;
 
-
-int main()
+void CameraThread()
 {
-	CvCapture* capture = cvCaptureFromCAM( 1 );
-
-	if ( !capture )
-	{
-		fprintf( stderr, "ERROR: capture is NULL \n" );
-		return 1;
-	}
-	
-	// Lower res = faster processing time.
-	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_WIDTH, 320);
-	cvSetCaptureProperty(capture, CV_CAP_PROP_FRAME_HEIGHT, 240);
-	//cvSetCaptureProperty(capture, CV_CAP_PROP_FOURCC, CV_FOURCC('I', 'Y', 'U', 'V'));
-
-	IplImage* frame = cvQueryFrame( capture );
+	IplImage* frame = cvQueryFrame( g_pCapture );
 	if ( !frame )
 	{
 		fprintf( stderr, "ERROR: frame is null...\n" );
-		return 1;
+		g_bCapThreadClosed = true;
+		return;
 	}
 
 	// let the cam initiate
 	double sleeptime = GetCurrentTime();
-	while(sleeptime + 5 > GetCurrentTime()) frame = cvQueryFrame( capture );
+	while(sleeptime + 5 > GetCurrentTime()) frame = cvQueryFrame( g_pCapture );
 
 	CvSize imgSize;
 	imgSize.width = frame->width;
@@ -317,6 +323,56 @@ int main()
 			fps,
 			imgSize
 			);
+	while(g_bCapThreadRunning)
+	{
+		// Get one frame
+		frame = cvQueryFrame( g_pCapture );
+		if ( !frame )
+		{
+			fprintf( stderr, "ERROR: frame is null...\n" );
+			break;
+		}
+
+		if(!g_pDetectorImage)
+			g_pDetectorImage = new CDetectorImage(frame->width, frame->height);
+		UpdateFrame(frame, g_pDetectorImage);
+
+		bool WriteFrame = ProccessFrame(g_pDetectorImage);
+		
+
+		if(WriteFrame && g_bWriteFrame)
+			cvWriteFrame(writer, frame);
+			
+		// Lets update the GUI capture thread texture thing
+		sf::Image* tex = static_cast<sf::Image*>( g_pImage->_GetTexture()->data );
+		sf::Color col;
+		color_t* pix;
+		XY_LOOP(frame->width, frame->height)
+		{
+			pix = g_pDetectorImage->Pixel(x, y);
+			col.r = pix->r;
+			col.g = pix->g;
+			col.b = pix->b;
+			tex->SetPixel(x, y, (const sf::Color)col);
+		}
+	}
+	cvReleaseVideoWriter(&writer);
+	g_bCapThreadClosed = true;
+}
+
+int main()
+{
+	g_pCapture = cvCaptureFromCAM( 1 );
+
+	if ( !g_pCapture )
+	{
+		fprintf( stderr, "ERROR: capture is NULL \n" );
+		return 1;
+	}
+	
+	// Lower res = faster processing time.
+	cvSetCaptureProperty(g_pCapture, CV_CAP_PROP_FRAME_WIDTH, 320);
+	cvSetCaptureProperty(g_pCapture, CV_CAP_PROP_FRAME_HEIGHT, 240);
 
 	// Init the Gwen GUI and SFML window
 	sf::RenderWindow App( sf::VideoMode( 640, 480, 32 ), "Detector", sf::Style::Close );
@@ -332,19 +388,42 @@ int main()
 	g_pCanvas->SetDrawBackground( true );
 	g_pCanvas->SetBackgroundColor( Gwen::Color( 150, 170, 170, 255 ) );
 	
-	
 	g_pWindowCam = new Gwen::Controls::WindowControl(g_pCanvas);
-	g_pWindowCam->SetSize( 320, 240 );
+	g_pWindowCam->SetSize( 320, 240 + 25 );
 	g_pWindowCam->SetClosable(false);
 	g_pWindowCam->SetTitle("Camera");
-
+	g_pWindowCam->SetPos(30, 30);
+	
+	g_pWindowSet = new Gwen::Controls::WindowControl(g_pCanvas);
+	g_pWindowSet->SetSize( 200, 240 );
+	g_pWindowSet->SetClosable(false);
+	g_pWindowSet->SetTitle("Settings");
+	g_pWindowSet->SetPos(355, 30);
+	
+	g_pCeckBoxRecord = new Gwen::Controls::CheckBoxWithLabel(g_pWindowSet);
+	g_pCeckBoxRecord->Label()->SetText("Record Motion", false);
+	//g_pCeckBoxRecord->Checkbox()->IsChecked();
+	g_pCeckBoxRecord->SetPos(5, 5);
+	
+	g_pImage = new Gwen::Controls::ImagePanel(g_pWindowCam);
+	g_pImage->SetImage("loading.png");
+	g_pImage->SizeToContents();
+	
+	const sf::Image* tex = static_cast<sf::Image*>( g_pImage->_GetTexture()->data );
+	if ( !tex )
+	{
+		cout << "ERROR LOADING 'loading.png'\n";
+		return 1;
+	}
+	
+	//sf::Color col = tex->GetPixel( x, y );
+	
 	Gwen::Input::SFML GwenInput;
 	GwenInput.Initialize( g_pCanvas );
+	
+	// Now lets start the Capture thread
+	thread thrd(CameraThread);
 
-	// Create a window in which the captured images will be presented
-	cvNamedWindow( "Detector", CV_WINDOW_AUTOSIZE );
-	cvNamedWindow( "Detector - Motion", CV_WINDOW_AUTOSIZE );
-	cvMoveWindow( "Detector - Motion", 640, 0);
 	// Show the image captured from the camera in the window and repeat
 	while ( App.IsOpened() )
 	{
@@ -352,8 +431,7 @@ int main()
 		sf::Event Event;
 		while ( App.GetEvent(Event) )
 		{
-			if ((Event.Type == sf::Event::Closed) || 
-									((Event.Type == sf::Event::KeyPressed) && (Event.Key.Code == sf::Key::Escape)))
+			if ((Event.Type == sf::Event::Closed) || ((Event.Type == sf::Event::KeyPressed) && (Event.Key.Code == sf::Key::Escape)))
 			{
 				App.Close();
 				break;
@@ -363,41 +441,11 @@ int main()
 		
 		App.Clear();
 		
-		// Get one frame
-		frame = cvQueryFrame( capture );
-		if ( !frame )
-		{
-			fprintf( stderr, "ERROR: frame is null...\n" );
-			break;
-		}
-
-		if(!g_pDetectorImage)
-			g_pDetectorImage = new CDetectorImage(frame->width, frame->height);
-		UpdateFrame(frame, g_pDetectorImage);
-
-		bool WriteFrame = ProccessFrame(g_pDetectorImage);
-		UpdateFrame(g_pDetectorImage, frame);
-
-		if(WriteFrame && g_bWriteFrame)
-			cvWriteFrame(writer, frame);
-
-		cvShowImage( "Detector", frame );
-
-		if(g_pDetector->GetMotionImage())
-		{
-			UpdateFrame(g_pDetector->GetMotionImage(), frame);
-			cvShowImage( "Detector - Motion", frame );
-		}
-		
 		g_pCanvas->RenderCanvas();
 		App.Display();
-		cvWaitKey(10);
+		cvWaitKey(1);
 	}
-	// Release the capture device housekeeping
-	cvReleaseCapture( &capture ); // Likes to segfault
-	cvDestroyWindow( "Detector" );
-	cvDestroyWindow( "Detector - Motion");
-	cvReleaseVideoWriter(&writer);
-
+	
+	cvReleaseCapture( &g_pCapture );
 	return 0;
 }
