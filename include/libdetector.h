@@ -64,9 +64,14 @@ namespace Detector
 		void SetDescriptor(IDescriptor* Descriptor);
 		// Set motion blur ammount
 		void SetMotionBlur(float flAmmount);
+		// Self explanitory - spelling is nice
+		void SetMotionBlurAmmount(float flAmmount);
+		// ""
+		void SetMotionBlurMaxChange(float flAmmount);
+		
 
 		// TODO: Below needs implenting
-
+		void SetRefrenceImage(CDetectorImage* pImage);
 		// Returns the number of targets that are too small and removed
 		unsigned int GetFalsePosCount();
 		// Gets the total motion (0 being none, 1 being all)

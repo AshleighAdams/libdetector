@@ -172,6 +172,16 @@ CDetector::~CDetector()
 	}
 }
 
+void CDetector::SetMotionBlurAmmount(float flAmmount)
+{
+	m_flBlurAmmount = flAmmount;
+}
+
+void CDetector::SetMotionBlurMaxChange(float flAmmount)
+{
+	m_flBlurMaxChange = flAmmount;
+}
+
 void CDetector::SetDescriptor(IDescriptor* Descriptor)
 {
 	if(m_pDescriptor)
@@ -288,9 +298,9 @@ EndLoop:
 		{
 			MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, m_flBlurMaxChange);
 			m_BlurUpdateRateFrame = 0;
-		}else if(m_flTotalMotion > 0.5f)
+		}else if(m_flTotalMotion > 0.25f)
 		{
-			MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, 999.f);
+			MotionBlur(m_pRefrenceImage, pImage, m_flBlurAmmount, 9999.f);
 		}
 	}
 
