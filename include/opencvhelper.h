@@ -14,51 +14,10 @@
 namespace Detector
 {
     // From an OpenCV image to a Detector image
-    void UpdateFrame(IplImage* From, CDetectorImage* To)
-    {
-        char* imgdata = From->imageData;
-        int widthstep = From->widthStep;
-        pixel_t* pix;
-
-        XY_LOOP(From->width, From->height)
-        {
-            pix = To->Pixel(x,y);
-            pix->b = ((unsigned char*)(imgdata + widthstep * y))[x*3];
-            pix->g = ((unsigned char*)(imgdata + widthstep * y))[x*3+1];
-            pix->r = ((unsigned char*)(imgdata + widthstep * y))[x*3+2];
-        }
-    }
-
+    void UpdateFrame(IplImage* From, CDetectorImage* To);
     // Detector image to OpenCV image
-    void UpdateFrame(CDetectorImage* Img, IplImage* Frame)
-    {
-        char* imgdata = Frame->imageData;
-        int widthstep = Frame->widthStep;
-        pixel_t* pix;
-
-        XY_LOOP(Frame->width, Frame->height)
-        {
-            pix = Img->Pixel(x,y);
-            ((unsigned char*)(imgdata + widthstep * y))[x*3] = pix->b;
-            ((unsigned char*)(imgdata + widthstep * y))[x*3+1] = pix->g;
-            ((unsigned char*)(imgdata + widthstep * y))[x*3+2] = pix->r;
-        }
-    }
-
+    void UpdateFrame(CDetectorImage* Img, IplImage* Frame);
     // Motion data to OpenCV image
-    void UpdateFrame(motion_t* motion, IplImage* Frame)
-    {
-        char* imgdata = Frame->imageData;
-        int widthstep = Frame->widthStep;
-
-        unsigned char amm;
-        XY_LOOP(Frame->width, Frame->height)
-        {
-            amm = (PMOTION_XY(motion, x, y)) ? 255 : 0;
-            ((unsigned char*)(imgdata + widthstep * y))[x*3] = amm;
-            ((unsigned char*)(imgdata + widthstep * y))[x*3+1] = amm;
-            ((unsigned char*)(imgdata + widthstep * y))[x*3+2] = amm;
-        }
-    }
+    void UpdateFrame(motion_t* motion, IplImage* Frame);
 }
 #endif

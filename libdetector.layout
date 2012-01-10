@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
-	<File name="include/interface.h" open="1" top="0" tabpos="7">
-		<Cursor position="166" topLine="0" />
+	<File name="include/interface.h" open="1" top="0" tabpos="5">
+		<Cursor position="3538" topLine="128" />
 	</File>
 	<File name="include/libdetector.h" open="1" top="0" tabpos="4">
 		<Cursor position="77" topLine="0" />
 	</File>
-	<File name="src/detector.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="8662" topLine="325" />
+	<File name="src/detector.cpp" open="1" top="1" tabpos="1">
+		<Cursor position="8662" topLine="335" />
 	</File>
-	<File name="src/discriptor.cpp" open="1" top="0" tabpos="8">
-		<Cursor position="1293" topLine="62" />
+	<File name="src/discriptor.cpp" open="1" top="0" tabpos="6">
+		<Cursor position="1293" topLine="137" />
 	</File>
 	<File name="src/image.cpp" open="1" top="0" tabpos="3">
 		<Cursor position="2454" topLine="81" />

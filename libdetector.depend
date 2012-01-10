@@ -82,14 +82,14 @@
 	<cmath>
 	"../header/libdetector.h"
 
-1314481845 source:/home/c0bra/Projects/libdetector/src/detector.cpp
+1315922960 source:/home/c0bra/Projects/libdetector/src/detector.cpp
 	"string.h"
 	<iostream>
 	<exception>
 	<cmath>
 	"../include/libdetector.h"
 
-1315922991 /home/c0bra/Projects/libdetector/include/libdetector.h
+1315923340 /home/c0bra/Projects/libdetector/include/libdetector.h
 	"interface.h"
 	"opencvhelper.h"
 
@@ -102,7 +102,7 @@
 	<vector>
 	<list>
 
-1314647964 /home/c0bra/Projects/libdetector/include/opencvhelper.h
+1326225082 /home/c0bra/Projects/libdetector/include/opencvhelper.h
 	"libdetector.h"
 
 1314742574 source:/home/c0bra/Projects/libdetector/src/discriptor.cpp
@@ -140,4 +140,18 @@
 	<exception>
 	<cmath>
 	"../include/libdetector.h"
+
+1326224974 source:/home/c0bra/Projects/libdetector/src/opencvhelper.cpp
+	<thread>
+	<stdio.h>
+	<stdlib.h>
+	<iostream>
+	<time.h>
+	<string.h>
+	<vector>
+	<list>
+	<cmath>
+	"opencv/cv.h"
+	"opencv/highgui.h"
+	"libdetector/include/libdetector.h"
 
