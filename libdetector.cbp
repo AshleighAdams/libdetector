@@ -16,6 +16,7 @@
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add directory="/home/c0bra/Desktop/Projects/libdetector/" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
@@ -26,8 +27,9 @@
 				<Option compiler="gcc" />
 				<Option createDefFile="1" />
 				<Compiler>
-					<Add option="-Wall" />
 					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add directory="/home/c0bra/Desktop/Projects/libdetector/" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />

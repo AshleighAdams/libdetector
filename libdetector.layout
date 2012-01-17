@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Release" />
-	<File name="include/interface.h" open="0" top="0" tabpos="5">
-		<Cursor position="3538" topLine="128" />
+	<File name="include/interface.h" open="1" top="0" tabpos="6">
+		<Cursor position="2616" topLine="112" />
 	</File>
-	<File name="include/libdetector.h" open="1" top="1" tabpos="10">
+	<File name="include/libdetector.h" open="1" top="0" tabpos="3">
 		<Cursor position="5857" topLine="0" />
 	</File>
-	<File name="include/opencvhelper.h" open="1" top="0" tabpos="9">
-		<Cursor position="618" topLine="0" />
+	<File name="include/opencvhelper.h" open="1" top="0" tabpos="2">
+		<Cursor position="64" topLine="0" />
 	</File>
 	<File name="src/detector.cpp" open="0" top="0" tabpos="1">
 		<Cursor position="8662" topLine="335" />
 	</File>
-	<File name="src/discriptor.cpp" open="0" top="0" tabpos="6">
-		<Cursor position="1293" topLine="137" />
+	<File name="src/discriptor.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="1166" topLine="49" />
 	</File>
-	<File name="src/image.cpp" open="0" top="0" tabpos="3">
-		<Cursor position="2454" topLine="81" />
+	<File name="src/image.cpp" open="1" top="1" tabpos="8">
+		<Cursor position="616" topLine="16" />
 	</File>
-	<File name="src/opencvhelper.cpp" open="1" top="0" tabpos="8">
-		<Cursor position="1300" topLine="22" />
+	<File name="src/opencvhelper.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="600" topLine="1" />
 	</File>
-	<File name="src/util.cpp" open="0" top="0" tabpos="2">
-		<Cursor position="3654" topLine="120" />
+	<File name="src/tracker.cpp" open="1" top="0" tabpos="4">
+		<Cursor position="254" topLine="0" />
+	</File>
+	<File name="src/util.cpp" open="1" top="0" tabpos="5">
+		<Cursor position="4823" topLine="172" />
 	</File>
 </CodeBlocks_layout_file>
