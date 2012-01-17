@@ -29,9 +29,12 @@ void Detector::UpdateFrame(IplImage* From, CDetectorImage* To)
 	XY_LOOP(From->width, From->height)
 	{
 		pix = To->Pixel(x,y);
-		pix->b = ((unsigned char*)(imgdata + widthstep * y))[x*3];
-		pix->g = ((unsigned char*)(imgdata + widthstep * y))[x*3+1];
-		pix->r = ((unsigned char*)(imgdata + widthstep * y))[x*3+2];
+		if(pix)
+		{
+			pix->b = ((unsigned char*)(imgdata + widthstep * y))[x*3];
+			pix->g = ((unsigned char*)(imgdata + widthstep * y))[x*3+1];
+			pix->r = ((unsigned char*)(imgdata + widthstep * y))[x*3+2];
+		}
 	}
 }
 

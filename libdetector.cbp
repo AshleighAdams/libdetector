@@ -36,10 +36,12 @@
 		</Build>
 		<Unit filename="include/interface.h" />
 		<Unit filename="include/libdetector.h" />
+		<Unit filename="include/opencvhelper.h" />
 		<Unit filename="src/detector.cpp" />
 		<Unit filename="src/discriptor.cpp" />
 		<Unit filename="src/image.cpp" />
 		<Unit filename="src/object.cpp" />
+		<Unit filename="src/opencvhelper.cpp" />
 		<Unit filename="src/tracker.cpp" />
 		<Unit filename="src/util.cpp" />
 		<Extensions>

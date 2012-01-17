@@ -148,7 +148,7 @@ CDetector::CDetector( imagesize_t Size )
 	m_pDescriptor = NULL;
 	m_flBlurAmmount = .1f;
 	m_flBlurMaxChange = 1.f;
-	m_BlurUpdateRate = 10; // So we can slow the update rate of the background image
+	m_BlurUpdateRate = 4; // So we can slow the update rate of the background image
 	m_BlurUpdateRateFrame = 0;
 	m_flTotalMotion = 0.f;
 
