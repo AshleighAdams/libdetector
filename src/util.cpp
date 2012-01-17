@@ -187,7 +187,7 @@ void S_BlurMotion(motion_t* motion)
 	motion->motion = newmotion;
 }
 
-
+// This is slower, derp :V
 float Detector::Q_sqrt( float number ) // Thanks whoever made this (this implentation is from Quake III Arena)
 {
 	long i;

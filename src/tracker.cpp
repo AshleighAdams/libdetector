@@ -13,8 +13,10 @@ float Detector::Distance(position_t& a, position_t& b)
 {
 	float x = std::abs(a.x - b.x);
 	float y = std::abs(a.y - b.y);
-
-	return Q_sqrt(x*x+y*y);
+	
+	// Quicker
+	return sqrt(x*x+y*y);
+	//return Q_sqrt(x*x+y*y);
 }
 
 CObjectTracker::CObjectTracker()

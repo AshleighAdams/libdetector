@@ -15,10 +15,9 @@
 // OpenCV includes
 using namespace std; // OpenCV needs this else we get 500 errors....
 #include "opencv/cv.h"
-#include "opencv/highgui.h"
 
 #define DETECTOR_OPENCV
-#include "libdetector/include/libdetector.h"
+#include "include/libdetector.h"
 
 void Detector::UpdateFrame(IplImage* From, CDetectorImage* To)
 {

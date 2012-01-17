@@ -64,8 +64,10 @@ float GetDistance(motion_t* Motion, int Angle, int startx, int starty)
 
 	float xx = abs(startx - x0);
 	float yy = abs(starty - y0);
-
-	return Q_sqrt(xx * xx + yy * yy);
+	
+	// Quicker
+	return sqrt(xx * xx + yy * yy);
+	//return Q_sqrt(xx * xx + yy * yy);
 }
 
 #define HISTO_VALUE(x, pos) x.values[(pos + x.highestvalue) % 360]
